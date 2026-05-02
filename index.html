@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Biz - v1.1</title>
+    <title>Goal Rider Biz - v1.2</title>
 
     <link rel="icon" href="https://img.icons8.com/clouds/256/delivery-man.png" type="image/png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/clouds/256/delivery-man.png">
@@ -49,6 +49,7 @@
         #map { width: 100%; height: 100%; border-radius: 10px; z-index: 1; background: #eee; }
         .search-container { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1500; display: flex; gap: 5px; }
         .search-input { flex: 1; padding: 10px; border-radius: 8px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-size: 14px; background: white; }
+        .search-btn { padding: 0 15px; background: #3498db; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 0.8em; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         .map-ui { position: absolute; bottom: 85px; right: 15px; display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
         .ui-btn { width: 50px; height: 50px; border-radius: 25px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 1.1em; cursor: pointer; }
 
@@ -62,7 +63,6 @@
         hr { border: 0; border-top: 1px solid #eee; margin: 6px 0; }
         .leaflet-tooltip-own { background: white; border: 1px solid #333; border-radius: 4px; padding: 2px 4px; font-size: 9px; font-weight: bold; }
         
-        /* リストの項目：タップ可能に */
         .spot-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .spot-item:active { background-color: #f0f0f0; }
         .spot-info-text { flex-grow: 1; margin-right: 10px; font-size: 0.85em; }
@@ -117,6 +117,7 @@
     <div id="pageMap" class="content-area" style="position: relative; padding:0;">
         <div class="search-container">
             <input type="text" id="addrSearch" class="search-input" placeholder="住所・建物名検索" onkeypress="if(event.key==='Enter')searchAddress()">
+            <button class="search-btn" onclick="searchAddress()">検索</button>
         </div>
         <div id="map"></div>
         <div class="map-ui">
@@ -164,7 +165,7 @@
     <div id="listModal" class="modal">
         <div class="modal-content">
             <h3>スポット一覧</h3>
-            <p style="font-size: 0.7em; color: #888; margin-bottom: 10px;">項目をタップすると地図へジャンプします</p>
+            <p style="font-size: 0.7em; color: #888; margin-bottom: 10px;">タップでジャンプ</p>
             <div id="spotList" style="max-height:350px; overflow-y:auto;"></div>
             <button class="btn-primary" onclick="document.getElementById('listModal').style.display='none'" style="margin-top:15px;">閉じる</button>
         </div>
@@ -174,6 +175,8 @@
         const DB_SALES = "https://goalrider-81f01-default-rtdb.firebaseio.com/data.json";
         const DB_MAP = "https://goalrider-81f01-default-rtdb.firebaseio.com/spots.json";
         const RIDERS = ["工藤正臣", "高瀬戒兜"];
+        const DEFAULT_GOAL = 300000; // デフォルト目標額を30万に設定
+        
         let currentRiderIdx = Number(localStorage.getItem('goalRider_idx')) || 0;
         let allData = JSON.parse(localStorage.getItem('goalRider_cache')) || {};
         let currentView = 'month', referenceDate = new Date(), myChart, myExpChart, myHourlyChart, map, currentPosMarker, editTargetId = null, allSpots = {}, mapMarkers = {};
@@ -198,7 +201,7 @@
             const data = allData[name]; let labels = [], chartSales = [], chartExp = [], chartHourly = [], chartNetHourly = [], tSales = 0, tExp = 0, tHours = 0;
             const y = referenceDate.getFullYear(), m = referenceDate.getMonth();
             const monthKey = `${y}-${String(m+1).padStart(2,'0')}`;
-            const currentGoal = data.goals ? (data.goals[monthKey] || 500000) : 500000;
+            const currentGoal = data.goals ? (data.goals[monthKey] || DEFAULT_GOAL) : DEFAULT_GOAL;
 
             if (currentView === 'month') {
                 const last = new Date(y, m + 1, 0).getDate();
@@ -249,9 +252,18 @@
             else { map.removeLayer(baseLayer); hybridLayer.addTo(map); mapType = 'hybrid'; document.getElementById('layerBtn').innerText = "🗺️"; }
         }
 
+        // 検索ロジックの復旧
         async function searchAddress() {
             const q = document.getElementById('addrSearch').value; if(!q) return;
-            try { const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=jp&limit=1`); const data = await res.json(); if(data[0]) map.flyTo([data[0].lat, data[0].lon], 18); } catch(e){}
+            try { 
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=jp&limit=1`); 
+                const data = await res.json(); 
+                if(data && data[0]) {
+                    map.flyTo([data[0].lat, data[0].lon], 18);
+                } else {
+                    alert("見つかりませんでした。住所を詳しく入力してください。");
+                }
+            } catch(e){ alert("検索エラーが発生しました。"); }
         }
 
         function analyzeMap() {
@@ -266,13 +278,11 @@
             alert("現在の曜日・時間に近いデータを強調しました！");
         }
 
-        // --- ①リストからのジャンプ機能を追加 ---
         function openSpotList() {
             const listDiv = document.getElementById('spotList'); listDiv.innerHTML = "";
             Object.keys(allSpots).reverse().forEach(id => {
                 const s = allSpots[id]; const item = document.createElement('div');
                 item.className = "spot-item";
-                // 項目全体をタップするとジャンプするように設定
                 item.onclick = () => jumpToSpot(id);
                 item.innerHTML = `
                     <div class="spot-info-text">
@@ -290,9 +300,7 @@
         function jumpToSpot(id) {
             const s = allSpots[id];
             document.getElementById('listModal').style.display = 'none';
-            // 地図を移動させてズーム
             map.flyTo([s.lat, s.lng], 18, { animate: true, duration: 1.5 });
-            // 移動後に詳細モーダルを開く
             setTimeout(() => { openSpotModal(s.lat, s.lng, id); }, 1600);
         }
 
@@ -360,7 +368,7 @@
         function navigatePeriod(dir) { if (currentView === 'month') referenceDate.setMonth(referenceDate.getMonth() + dir); else referenceDate.setDate(referenceDate.getDate() + (dir * 7)); renderApp(); }
         async function setGoal() { 
             const n = RIDERS[currentRiderIdx], y = referenceDate.getFullYear(), m = referenceDate.getMonth(), mk = `${y}-${String(m+1).padStart(2,'0')}`;
-            const v = prompt(`${y}年${m+1}月の目標額`, allData[n].goals ? (allData[n].goals[mk] || 500000) : 500000); 
+            const v = prompt(`${y}年${m+1}月の目標額`, allData[n].goals ? (allData[n].goals[mk] || DEFAULT_GOAL) : DEFAULT_GOAL); 
             if(v !== null) { if(!allData[n].goals) allData[n].goals = {}; allData[n].goals[mk] = Number(v); renderApp(); await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); } 
         }
     </script>
