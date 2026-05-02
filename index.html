@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Strategic Pro+</title>
+    <title>Goal Rider Strategic Pro Max</title>
 
     <link rel="icon" href="https://img.icons8.com/clouds/256/delivery-man.png" type="image/png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/clouds/256/delivery-man.png">
@@ -27,7 +27,7 @@
         .stats-val { font-weight: 800; font-size: 1.1em; color: #2c3e50; line-height: 1.2; }
         .stats-label { font-size: 0.7em; color: #777; }
 
-        .btn-row { display: flex; gap: 4px; margin-bottom: 6px; }
+        .btn-row { display: flex; gap: 4px; margin-bottom: 6px; align-items: center; }
         button { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #ddd; background: white; cursor: pointer; font-weight: bold; font-size: 0.8em; }
         .active-view { background: #e3f2fd !important; border-color: #3498db !important; color: #1e88e5 !important; }
         .btn-primary { background: #2ecc71; color: white; border: none; width: 100%; padding: 12px; font-size: 1.1em; border-radius: 10px; cursor: pointer; }
@@ -40,12 +40,13 @@
         .chart-container-mini { height: 60px; position: relative; margin-bottom: 4px; }
 
         /* MAP */
-        #map { width: 100%; height: 100%; border-radius: 10px; z-index: 1; background: #000; }
+        #map { width: 100%; height: 100%; border-radius: 10px; z-index: 1; background: #eee; }
         .search-container { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1500; display: flex; gap: 5px; }
         .search-input { flex: 1; padding: 12px; border-radius: 8px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-size: 16px; }
         .map-ui { position: absolute; bottom: 80px; right: 15px; display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
-        .ui-btn { width: 54px; height: 54px; border-radius: 27px; border: none; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 1.2em; }
-        .leaflet-tooltip-own { background: rgba(255,255,255,0.9); border: 1px solid #333; border-radius: 4px; padding: 2px 5px; font-size: 10px; font-weight: bold; color: #d35400; }
+        .ui-btn { width: 54px; height: 54px; border-radius: 27px; border: none; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 1.2em; cursor: pointer; }
+        
+        .leaflet-tooltip-own { background: rgba(255,255,255,0.95); border: 1px solid #333; border-radius: 4px; padding: 3px 6px; font-size: 11px; font-weight: bold; color: #d35400; white-space: nowrap; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; overflow-y: auto; }
         .modal-content { background: white; margin: 10% auto; padding: 20px; width: 90%; border-radius: 15px; }
@@ -55,7 +56,7 @@
 
     <div class="main-tabs">
         <button id="tabSales" class="tab-btn active" onclick="showPage('sales')">経営ダッシュボード</button>
-        <button id="tabMap" class="tab-btn" onclick="showPage('map')">詳細MAP</button>
+        <button id="tabMap" class="tab-btn" onclick="showPage('map')">ゼンリン風MAP</button>
     </div>
 
     <div id="pageSales" class="content-area active">
@@ -64,7 +65,7 @@
             <button id="rider1" class="rider-btn" onclick="switchRider(1)">高瀬戒兜</button>
         </div>
         <div class="card">
-            <div style="display: flex; justify-content: space-between;"><h2 style="font-size:0.9em; margin:0;"><span id="riderDisplayName">---</span></h2><button onclick="setGoal()" style="font-size:0.7em;">設定</button></div>
+            <div style="display: flex; justify-content: space-between;"><h2 style="font-size:0.9em; margin:0;"><span id="riderDisplayName">---</span></h2><button onclick="setGoal()" style="font-size:0.7em;">目標設定</button></div>
             <div class="stats-grid">
                 <div><div class="stats-label">売上合計</div><div class="stats-val" id="totalSales">0円</div></div>
                 <div><div class="stats-label" style="color:#e74c3c;">目標まで</div><div class="stats-val" id="displayRemaining" style="color:#e74c3c;">0円</div></div>
@@ -72,11 +73,15 @@
                 <div><div class="stats-label">実質時給</div><div class="stats-val" style="color:#2ecc71;" id="netHourly">0円</div></div>
             </div>
         </div>
+        
         <div class="btn-row">
-            <button onclick="changeMonth(-1)">前月</button>
-            <span id="periodLabel" style="flex:2; text-align:center; align-self:center; font-weight:bold; font-size:0.9em;"></span>
-            <button onclick="changeMonth(1)">翌月</button>
+            <button id="btnWeek" onclick="switchView('week')">週次</button>
+            <button id="btnMonth" onclick="switchView('month')" class="active-view">月次</button>
+            <button onclick="changeMonth(-1)" style="flex:0.3;">◀</button>
+            <span id="periodLabel" style="flex:1.2; text-align:center; align-self:center; font-weight:bold; font-size:0.8em;"></span>
+            <button onclick="changeMonth(1)" style="flex:0.3;">▶</button>
         </div>
+
         <div class="card"><div class="stats-label">売上推移 (青)</div><div class="chart-container"><canvas id="salesChart"></canvas></div></div>
         <div class="card"><div class="stats-label">経費推移 (赤)</div><div class="chart-container-mini"><canvas id="expenseChart"></canvas></div></div>
         <div class="card"><div class="stats-label">時給推移 (橙/緑)</div><div class="chart-container"><canvas id="hourlyChart"></canvas></div></div>
@@ -93,7 +98,7 @@
             <button class="ui-btn" style="background:#fff; color:#2c3e50; font-size:1.5em; border:2px solid #2c3e50;" onclick="toggleMapType()" id="layerBtn">🗺️</button>
             <button class="ui-btn" style="background:white; color:#3498db; border:2px solid #3498db; font-size:1.6em;" onclick="goToCurrentLocation()">🎯</button>
             <button class="ui-btn" style="background:#f1c40f; color:black; font-weight:bold; font-size:0.85em;" onclick="analyzeMap()">分析</button>
-            <button class="ui-btn" style="background:#34495e; color:white; font-weight:bold; font-size:0.85em;" onclick="openSpotList()">一覧</button>
+            <button class="ui-btn" style="background:#34495e; color:white; font-weight:bold; font-size:0.85em;" onclick="openSpotList()">リスト</button>
         </div>
     </div>
 
@@ -106,13 +111,12 @@
         const RIDERS = ["工藤正臣", "高瀬戒兜"];
         let currentRiderIdx = Number(localStorage.getItem('goalRider_idx')) || 0;
         let allData = JSON.parse(localStorage.getItem('goalRider_cache')) || { "工藤正臣": { goal: 500000, sales: {} }, "高瀬戒兜": { goal: 500000, sales: {} } };
-        let referenceDate = new Date(), myChart, myExpenseChart, myHourlyChart, map, currentPosMarker, editTargetId = null, allSpots = {}, mapMarkers = {};
-        let mapType = 'hybrid'; // 航空写真モード
+        let currentView = 'month', referenceDate = new Date(), myChart, myExpenseChart, myHourlyChart, map, currentPosMarker, editTargetId = null, allSpots = {}, mapMarkers = {};
+        let mapType = 'hybrid'; 
 
         window.onload = () => {
             document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
-            switchRider(currentRiderIdx);
-            fetchCloudSales();
+            switchRider(currentRiderIdx); fetchCloudSales();
         };
 
         function showPage(page) {
@@ -128,48 +132,56 @@
             const name = RIDERS[currentRiderIdx], data = allData[name] || { goal: 500000, sales: {} };
             let labels = [], chartSales = [], chartExp = [], chartHourly = [], chartNetHourly = [], tSales = 0, tExp = 0, tHours = 0;
             const y = referenceDate.getFullYear(), m = referenceDate.getMonth();
-            const last = new Date(y, m + 1, 0).getDate();
-            document.getElementById('periodLabel').innerText = `${y}年${m + 1}月`;
-            for (let i = 1; i <= last; i++) {
-                let key = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                labels.push(i); const s = data.sales[key] || {};
-                const ds = (s.uber||0)+(s.demae||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
-                chartSales.push(ds); chartExp.push(de); chartHourly.push(dh > 0 ? Math.round(ds/dh) : 0); chartNetHourly.push(dh > 0 ? Math.round((ds-de)/dh) : 0);
-                tSales += ds; tExp += de; tHours += dh;
+
+            if (currentView === 'month') {
+                const last = new Date(y, m + 1, 0).getDate();
+                document.getElementById('periodLabel').innerText = `${y}年${m + 1}月`;
+                for (let i = 1; i <= last; i++) {
+                    let key = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                    labels.push(i);
+                    const s = data.sales[key] || {};
+                    const ds = (s.uber||0)+(s.demae||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
+                    chartSales.push(ds); chartExp.push(de); chartHourly.push(dh > 0 ? Math.round(ds/dh) : 0); chartNetHourly.push(dh > 0 ? Math.round((ds-de)/dh) : 0);
+                    tSales += ds; tExp += de; tHours += dh;
+                }
+            } else {
+                document.getElementById('periodLabel').innerText = "直近7日間";
+                for (let i = 6; i >= 0; i--) {
+                    let d = new Date(); d.setDate(d.getDate() - i);
+                    let key = d.toISOString().split('T')[0];
+                    labels.push(d.getDate() + "日");
+                    const s = data.sales[key] || {};
+                    const ds = (s.uber||0)+(s.demae||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
+                    chartSales.push(ds); chartExp.push(de); chartHourly.push(dh > 0 ? Math.round(ds/dh) : 0); chartNetHourly.push(dh > 0 ? Math.round((ds-de)/dh) : 0);
+                    tSales += ds; tExp += de; tHours += dh;
+                }
             }
+
             document.getElementById('totalSales').innerText = tSales.toLocaleString() + "円";
             document.getElementById('displayRemaining').innerText = Math.max(0, (data.goal||0) - tSales).toLocaleString() + "円";
             document.getElementById('avgHourly').innerText = tHours > 0 ? Math.round(tSales/tHours).toLocaleString() + "円" : "0円";
             document.getElementById('netHourly').innerText = tHours > 0 ? Math.round((tSales-tExp)/tHours).toLocaleString() + "円" : "0円";
-            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { beginAtZero: true } } };
+            
+            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { beginAtZero: true, ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 8 } } } } };
             if (myChart) myChart.destroy(); myChart = new Chart(document.getElementById('salesChart'), { type: 'bar', data: { labels, datasets: [{ data: chartSales, backgroundColor: '#3498db' }] }, options: opt });
             if (myExpenseChart) myExpenseChart.destroy(); myExpenseChart = new Chart(document.getElementById('expenseChart'), { type: 'bar', data: { labels, datasets: [{ data: chartExp, backgroundColor: '#e74c3c' }] }, options: opt });
-            if (myHourlyChart) myHourlyChart.destroy(); myHourlyChart = new Chart(document.getElementById('hourlyChart'), { type: 'line', data: { labels, datasets: [{ data: chartHourly, borderColor: '#f39c12', tension: 0.3 }, { data: chartNetHourly, borderColor: '#2ecc71', tension: 0.3 }]}, options: opt });
+            if (myHourlyChart) myHourlyChart.destroy(); myHourlyChart = new Chart(document.getElementById('hourlyChart'), { type: 'line', data: { labels, datasets: [{ data: chartHourly, borderColor: '#f39c12', tension: 0.3, borderDash: [2,2] }, { data: chartNetHourly, borderColor: '#2ecc71', tension: 0.3 }]}, options: opt });
         }
 
-        // --- MAP 強化ロジック ---
         let baseLayer, hybridLayer;
         function initMap() {
             map = L.map('map', { zoomControl: false, maxZoom: 20 }).setView([35.9127, 139.4811], 18);
-            
-            // 通常地図
+            // 真っ白・真っ黒回避のため、高精度のOSMタイルを使用
             baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
-            // ハイブリッド航空写真（Googleに近い詳細度）
             hybridLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 20 });
-
             hybridLayer.addTo(map);
             map.on('contextmenu', e => openSpotModal(e.latlng.lat, e.latlng.lng));
             startLocationWatch(); loadAllSpots();
         }
 
         function toggleMapType() {
-            if (mapType === 'hybrid') {
-                map.removeLayer(hybridLayer); baseLayer.addTo(map);
-                mapType = 'normal'; document.getElementById('layerBtn').innerText = "🛰️";
-            } else {
-                map.removeLayer(baseLayer); hybridLayer.addTo(map);
-                mapType = 'hybrid'; document.getElementById('layerBtn').innerText = "🗺️";
-            }
+            if (mapType === 'hybrid') { map.removeLayer(hybridLayer); baseLayer.addTo(map); mapType = 'normal'; document.getElementById('layerBtn').innerText = "🛰️"; }
+            else { map.removeLayer(baseLayer); hybridLayer.addTo(map); mapType = 'hybrid'; document.getElementById('layerBtn').innerText = "🗺️"; }
         }
 
         async function searchAddress() {
@@ -179,10 +191,11 @@
 
         function openSpotModal(lat, lng, id = null) {
             editTargetId = id; document.getElementById('spotModal').style.display = 'block'; document.getElementById('deleteBtn').style.display = id ? 'block' : 'none';
-            if (id) { const s = allSpots[id]; document.getElementById('spotBldg').value = s.bldg; document.getElementById('spotName').value = s.name; document.getElementById('mainCat').value = s.mainCat; document.getElementById('spotComment').value = s.comment; window.tempLat = s.lat; window.tempLng = s.lng; }
+            if (id) { const s = allSpots[id]; document.getElementById('spotBldg').value = s.bldg; document.getElementById('spotName').value = s.name; document.getElementById('spotComment').value = s.comment; window.tempLat = s.lat; window.tempLng = s.lng; }
             else { document.getElementById('spotBldg').value = ""; document.getElementById('spotName').value = ""; document.getElementById('spotComment').value = ""; window.tempLat = lat; window.tempLng = lng; }
         }
         function closeSpotModal() { document.getElementById('spotModal').style.display = 'none'; }
+        function openStreetView() { window.open(`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${window.tempLat},${window.tempLng}`, '_blank'); }
 
         async function saveSpot() {
             const spot = { lat: window.tempLat, lng: window.tempLng, bldg: document.getElementById('spotBldg').value, name: document.getElementById('spotName').value, mainCat: document.getElementById('mainCat').value, comment: document.getElementById('spotComment').value, rider: RIDERS[currentRiderIdx], time: new Date().toLocaleString(), day: new Date().getDay(), hour: new Date().getHours() };
@@ -205,12 +218,15 @@
         function goToCurrentLocation() { if (window.latestPos) map.flyTo(window.latestPos, 19); }
         async function saveSales() { const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value; if(!allData[n].sales) allData[n].sales = {}; allData[n].sales[dk] = { hours: Number(document.getElementById('inputHours').value), gas: Number(document.getElementById('inputGas').value), uber: Number(document.getElementById('inputUber')), demae: Number(document.getElementById('inputDemae')) }; closeInputModal(); localStorage.setItem('goalRider_cache', JSON.stringify(allData)); renderApp(); await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); }
         function loadExistingData() { const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value; const d = allData[n].sales[dk] || {}; document.getElementById('inputHours').value = d.hours || ""; document.getElementById('inputGas').value = d.gas || ""; document.getElementById('inputUber').value = d.uber || ""; document.getElementById('inputDemae').value = d.demae || ""; }
-        function switchRider(idx) { currentRiderIdx = idx; localStorage.setItem('goalRider_idx', idx); document.getElementById('riderDisplayName').innerText = RIDERS[idx]; renderApp(); }
+        function switchRider(idx) { currentRiderIdx = idx; localStorage.setItem('goalRider_idx', idx); document.getElementById('rider0').className = 'rider-btn'+(idx==0?' rider-active':''); document.getElementById('rider1').className = 'rider-btn'+(idx==1?' rider-active':''); document.getElementById('riderDisplayName').innerText = RIDERS[idx]; renderApp(); }
+        function switchView(v) { currentView = v; document.getElementById('btnWeek').className = v=='week'?'active-view':''; document.getElementById('btnMonth').className = v=='month'?'active-view':''; renderApp(); }
         function openInputModal() { document.getElementById('inputModal').style.display='block'; loadExistingData(); }
         function closeInputModal() { document.getElementById('inputModal').style.display='none'; }
         async function deleteSpot() { if(!confirm("記録を削除しますか？")) return; await fetch(`${DB_MAP.replace('.json', `/${editTargetId}.json`)}`, { method: 'DELETE' }); closeSpotModal(); loadAllSpots(); }
         function changeMonth(diff) { referenceDate.setMonth(referenceDate.getMonth() + diff); renderApp(); }
         function setGoal() { const n=RIDERS[currentRiderIdx], v=prompt("目標額を入力", allData[n].goal); if(v){allData[n].goal=Number(v); renderApp(); fetch(DB_SALES,{method:'PUT', body:JSON.stringify(allData)});} }
+        function openSpotList() { alert("一覧機能はマーカーをタップまたは長押しで行えます"); }
+        function analyzeMap() { const nowDay = new Date().getDay(), nowHour = new Date().getHours(); Object.keys(allSpots).forEach(id => { const s = allSpots[id]; const isRelevant = (s.day === nowDay && Math.abs(s.hour - nowHour) <= 2); mapMarkers[id].setRadius(isRelevant ? 18 : 8); }); alert("現在の条件に近いデータを強調しました！"); }
     </script>
 </body>
 </html>
