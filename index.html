@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Strategic MAP Pro</title>
+    <title>Goal Rider Strategic MAP Pro+</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -39,9 +39,11 @@
         /* MAP スタイル */
         #map { width: 100%; height: calc(100% - 40px); border-radius: 10px; z-index: 1; }
         .map-ui { position: absolute; bottom: 65px; right: 15px; display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
-        .ui-btn { width: 50px; height: 50px; border-radius: 25px; border: none; color: white; font-weight: bold; box-shadow: 0 4px 8px rgba(0,0,0,0.3); font-size: 0.8em; cursor: pointer; }
+        .ui-btn { width: 50px; height: 50px; border-radius: 25px; border: none; color: white; font-weight: bold; box-shadow: 0 4px 8px rgba(0,0,0,0.3); font-size: 0.8em; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         
-        /* 吹き出し（ラベル）のカスタマイズ */
+        /* 現在地ボタンのアイコン装飾 */
+        .locate-btn { background: #ffffff !important; color: #3498db !important; font-size: 1.5em !important; border: 2px solid #3498db !important; }
+
         .leaflet-tooltip-own {
             background: rgba(255, 255, 255, 0.9);
             border: 1px solid #333;
@@ -50,9 +52,10 @@
             font-size: 11px;
             font-weight: bold;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            white-space: nowrap;
         }
 
-        /* モーダル共通 */
+        /* モーダル */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; overflow-y: auto; }
         .modal-content { background: white; margin: 5% auto; padding: 20px; width: 90%; border-radius: 15px; box-sizing: border-box; }
         .input-group { margin-bottom: 12px; }
@@ -109,6 +112,7 @@
     <div id="pageMap" class="content-area">
         <div id="map"></div>
         <div class="map-ui">
+            <button class="ui-btn locate-btn" onclick="goToCurrentLocation()">🎯</button>
             <button class="ui-btn" style="background: #f1c40f;" onclick="analyzeMap()">分析</button>
             <button class="ui-btn" style="background: #34495e;" onclick="openSpotList()">リスト</button>
         </div>
@@ -117,65 +121,9 @@
         </div>
     </div>
 
-    <div id="inputModal" class="modal">
-        <div class="modal-content">
-            <h3>実績入力</h3>
-            <div class="input-group"><label>日付</label><input type="date" id="inputDate" onchange="loadExistingData()"></div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-                <div class="input-group"><label>稼働時間 (h)</label><input type="number" id="inputHours" step="0.5"></div>
-                <div class="input-group"><label>ガソリン代</label><input type="number" id="inputGas"></div>
-            </div>
-            <div class="input-group"><label>その他経費</label><input type="number" id="inputOtherExp"></div>
-            <hr>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <div class="input-group"><label>Uber</label><input type="number" id="inputUber" inputmode="numeric"></div>
-                <div class="input-group"><label>出前館</label><input type="number" id="inputDemae" inputmode="numeric"></div>
-                <div class="input-group"><label>Menu</label><input type="number" id="inputMenu" inputmode="numeric"></div>
-                <div class="input-group"><label>ロケット</label><input type="number" id="inputRocket" inputmode="numeric"></div>
-            </div>
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button onclick="closeInputModal()" style="background:#eee;">戻る</button>
-                <button class="btn-primary" style="margin-top:0;" onclick="saveSales()">保存</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="spotModal" class="modal">
-        <div class="modal-content">
-            <h3 id="spotModalTitle">スポット記録</h3>
-            <div id="spotInfo" style="font-size: 0.7em; color: #666; margin-bottom: 10px;"></div>
-            <div class="input-group">
-                <label>カテゴリ</label>
-                <select id="mainCat" onchange="updateSubCat()">
-                    <option value="">選択してください</option>
-                    <option value="待機">待機</option>
-                    <option value="ピック">ピック</option>
-                    <option value="ドロップ">ドロップ</option>
-                </select>
-            </div>
-            <div class="input-group" id="subCatGroup" style="display:none;">
-                <label id="subCatLabel">評価</label>
-                <select id="subCat"></select>
-            </div>
-            <div class="input-group">
-                <label>コメント</label>
-                <textarea id="spotComment" rows="3" placeholder="状況を入力..."></textarea>
-            </div>
-            <div class="btn-row">
-                <button onclick="closeSpotModal()">閉じる</button>
-                <button id="deleteBtn" style="background:#e74c3c; color:white; display:none;" onclick="deleteSpot()">削除</button>
-                <button class="btn-primary" style="margin:0;" onclick="saveSpot()">保存</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="listModal" class="modal">
-        <div class="modal-content">
-            <h3>スポット一覧</h3>
-            <div id="spotList"></div>
-            <button class="btn-primary" onclick="document.getElementById('listModal').style.display='none'" style="margin-top:15px;">閉じる</button>
-        </div>
-    </div>
+    <div id="inputModal" class="modal"><div class="modal-content"><h3>実績入力</h3><div class="input-group"><label>日付</label><input type="date" id="inputDate" onchange="loadExistingData()"></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;"><div class="input-group"><label>稼働時間 (h)</label><input type="number" id="inputHours" step="0.5"></div><div class="input-group"><label>ガソリン代</label><input type="number" id="inputGas"></div></div><div class="input-group"><label>その他経費</label><input type="number" id="inputOtherExp"></div><hr><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div class="input-group"><label>Uber</label><input type="number" id="inputUber" inputmode="numeric"></div><div class="input-group"><label>出前館</label><input type="number" id="inputDemae" inputmode="numeric"></div><div class="input-group"><label>Menu</label><input type="number" id="inputMenu" inputmode="numeric"></div><div class="input-group"><label>ロケット</label><input type="number" id="inputRocket" inputmode="numeric"></div></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="closeInputModal()" style="background:#eee;">戻る</button><button class="btn-primary" style="margin-top:0;" onclick="saveSales()">保存</button></div></div></div>
+    <div id="spotModal" class="modal"><div class="modal-content"><h3 id="spotModalTitle">スポット記録</h3><div id="spotInfo" style="font-size: 0.7em; color: #666; margin-bottom: 10px;"></div><div class="input-group"><label>カテゴリ</label><select id="mainCat" onchange="updateSubCat()"><option value="">選択してください</option><option value="待機">待機</option><option value="ピック">ピック</option><option value="ドロップ">ドロップ</option></select></div><div class="input-group" id="subCatGroup" style="display:none;"><label id="subCatLabel">評価</label><select id="subCat"></select></div><div class="input-group"><label>コメント</label><textarea id="spotComment" rows="3" placeholder="状況を入力..."></textarea></div><div class="btn-row"><button onclick="closeSpotModal()">閉じる</button><button id="deleteBtn" style="background:#e74c3c; color:white; display:none;" onclick="deleteSpot()">削除</button><button class="btn-primary" style="margin:0;" onclick="saveSpot()">保存</button></div></div></div>
+    <div id="listModal" class="modal"><div class="modal-content"><h3>スポット一覧</h3><div id="spotList"></div><button class="btn-primary" onclick="document.getElementById('listModal').style.display='none'" style="margin-top:15px;">閉じる</button></div></div>
 
     <script>
         const DB_SALES = "https://goalrider-81f01-default-rtdb.firebaseio.com/data.json";
@@ -185,10 +133,9 @@
         let currentRiderIdx = Number(localStorage.getItem('goalRider_idx')) || 0;
         let allData = JSON.parse(localStorage.getItem('goalRider_cache')) || { "工藤正臣": { goal: 500000, sales: {} }, "高瀬戒兜": { goal: 500000, sales: {} } };
         let currentView = 'month', referenceDate = new Date();
-        let myChart = null, myExpenseChart = null, myHourlyChart = null;
-        let map, currentPos, editTargetId = null, allSpots = {}, mapMarkers = {};
+        let myChart, myExpenseChart, myHourlyChart;
+        let map, currentPosMarker, editTargetId = null, allSpots = {}, mapMarkers = {};
 
-        // --- 初期化 ---
         window.onload = () => {
             document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
             switchRider(currentRiderIdx);
@@ -202,202 +149,95 @@
             if(page === 'map' && !map) initMap();
         }
 
-        // --- 売上管理ロジック ---
-        async function fetchCloudSales() {
-            try { const res = await fetch(DB_SALES); const cloud = await res.json(); if (cloud) { allData = cloud; renderApp(); } } catch (e) {}
-        }
-
-        function renderApp() {
-            const name = RIDERS[currentRiderIdx];
-            const data = allData[name] || { goal: 500000, sales: {} };
-            let labels = [], chartSales = [], chartExpense = [], chartHourly = [], chartNetHourly = [], tSales = 0, tExp = 0, tHours = 0;
-            const y = referenceDate.getFullYear(), m = referenceDate.getMonth();
-
-            const last = currentView === 'month' ? new Date(y, m + 1, 0).getDate() : 7;
-            if (currentView === 'month') document.getElementById('periodLabel').innerText = `${y}年${m + 1}月`;
-            else {
-                const mon = new Date(referenceDate); mon.setDate(referenceDate.getDate() - (referenceDate.getDay() || 7) + 1);
-                document.getElementById('periodLabel').innerText = `${mon.getMonth()+1}/${mon.getDate()}〜`;
-            }
-
-            for (let i = 1; i <= last; i++) {
-                let key, label;
-                if (currentView === 'month') {
-                    key = `${y}-${String(m + 1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                    label = i;
-                } else {
-                    const mon = new Date(referenceDate); mon.setDate(referenceDate.getDate() - (referenceDate.getDay() || 7) + 1);
-                    const d = new Date(mon); d.setDate(mon.getDate() + i - 1);
-                    key = d.toISOString().split('T')[0];
-                    label = ['月','火','水','木','金','土','日'][i-1];
-                }
-                labels.push(label);
-                const s = data.sales[key] || {};
-                const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0);
-                const de = (s.gas||0)+(s.otherExp||0);
-                const dh = s.hours || 0;
-                chartSales.push(ds); chartExpense.push(de);
-                chartHourly.push(dh > 0 ? Math.round(ds / dh) : 0);
-                chartNetHourly.push(dh > 0 ? Math.round((ds - de) / dh) : 0);
-                tSales += ds; tExp += de; tHours += dh;
-            }
-
-            document.getElementById('totalSales').innerText = tSales.toLocaleString() + "円";
-            document.getElementById('netProfit').innerText = (tSales - tExp).toLocaleString() + "円";
-            document.getElementById('totalHours').innerText = tHours + "h";
-            document.getElementById('avgHourly').innerText = tHours > 0 ? Math.round(tSales / tHours).toLocaleString() + "円" : "0円";
-            document.getElementById('netHourly').innerText = tHours > 0 ? Math.round((tSales - tExp) / tHours).toLocaleString() + "円" : "0円";
-            document.getElementById('displayGoal').innerText = (data.goal||0).toLocaleString() + "円";
-            document.getElementById('displayRemaining').innerText = Math.max(0, (data.goal||0) - tSales).toLocaleString() + "円";
-
-            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 8 } } } } };
-            if (myChart) myChart.destroy();
-            myChart = new Chart(document.getElementById('salesChart'), { type: 'bar', data: { labels, datasets: [{ data: chartSales, backgroundColor: '#3498db' }] }, options: opt });
-            if (myExpenseChart) myExpenseChart.destroy();
-            myExpenseChart = new Chart(document.getElementById('expenseChart'), { type: 'bar', data: { labels, datasets: [{ data: chartExpense, backgroundColor: '#e06287' }] }, options: opt });
-            if (myHourlyChart) myHourlyChart.destroy();
-            myHourlyChart = new Chart(document.getElementById('hourlyChart'), { type: 'line', data: { labels, datasets: [
-                { data: chartHourly, borderColor: '#f39c12', fill: false, tension: 0.3 },
-                { data: chartNetHourly, borderColor: '#2ecc71', fill: false, tension: 0.3 }
-            ]}, options: opt });
-        }
-
-        async function saveSales() {
-            const n = RIDERS[currentRiderIdx], dkey = document.getElementById('inputDate').value;
-            if(!allData[n].sales) allData[n].sales = {};
-            allData[n].sales[dkey] = {
-                hours: Number(document.getElementById('inputHours').value) || 0,
-                gas: Number(document.getElementById('inputGas').value) || 0,
-                otherExp: Number(document.getElementById('inputOtherExp').value) || 0,
-                uber: Number(document.getElementById('inputUber').value) || 0,
-                demae: Number(document.getElementById('inputDemae').value) || 0,
-                menu: Number(document.getElementById('inputMenu').value) || 0,
-                rocket: Number(document.getElementById('inputRocket').value) || 0
-            };
-            closeInputModal();
-            localStorage.setItem('goalRider_cache', JSON.stringify(allData));
-            renderApp();
-            try { await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); } catch (e) {}
-        }
-
-        function loadExistingData() {
-            const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value;
-            const d = (allData[n].sales && allData[n].sales[dk]) ? allData[n].sales[dk] : {};
-            document.getElementById('inputHours').value = d.hours || "";
-            document.getElementById('inputGas').value = d.gas || "";
-            document.getElementById('inputOtherExp').value = d.otherExp || "";
-            document.getElementById('inputUber').value = d.uber || "";
-            document.getElementById('inputDemae').value = d.demae || "";
-            document.getElementById('inputMenu').value = d.menu || "";
-            document.getElementById('inputRocket').value = d.rocket || "";
-        }
-
-        function switchRider(idx) { currentRiderIdx = idx; localStorage.setItem('goalRider_idx', idx); document.getElementById('rider0').className = 'rider-btn'+(idx==0?' rider-active':''); document.getElementById('rider1').className = 'rider-btn'+(idx==1?' rider-active':''); document.getElementById('riderDisplayName').innerText = RIDERS[idx]; renderApp(); }
-        function switchView(v) { currentView = v; document.getElementById('btnWeek').className = v=='week'?'active-view':''; document.getElementById('btnMonth').className = v=='month'?'active-view':''; renderApp(); }
-        function navigateTime(dir) { currentView === 'month' ? referenceDate.setMonth(referenceDate.getMonth()+dir) : referenceDate.setDate(referenceDate.getDate()+(dir*7)); renderApp(); }
-        function setGoal() { const n = RIDERS[currentRiderIdx]; const v = prompt("目標", allData[n].goal); if(v){allData[n].goal=Number(v); renderApp(); fetch(DB_SALES,{method:'PUT',body:JSON.stringify(allData)});} }
-        function openInputModal() { document.getElementById('inputModal').style.display='block'; loadExistingData(); }
-        function closeInputModal() { document.getElementById('inputModal').style.display='none'; }
-
         // --- MAP ロジック ---
         function initMap() {
             map = L.map('map').setView([35.7297, 139.7111], 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
             map.on('contextmenu', e => openSpotModal(e.latlng.lat, e.latlng.lng));
-            navigator.geolocation.getCurrentPosition(p => { currentPos = [p.coords.latitude, p.coords.longitude]; map.setView(currentPos, 16); });
+            
+            // 現在地監視スタート
+            startLocationWatch();
             loadAllSpots();
         }
 
-        function updateSubCat() {
-            const main = document.getElementById('mainCat').value;
-            const sub = document.getElementById('subCat'), group = document.getElementById('subCatGroup'), label = document.getElementById('subCatLabel');
-            sub.innerHTML = "";
-            if (main === "待機") { label.innerText = "鳴りやすさ"; sub.innerHTML = '<option value="鳴るエリア">鳴るエリア</option><option value="鳴らないエリア">鳴らないエリア</option>'; group.style.display = "block"; }
-            else if (main === "ピック" || main === "ドロップ") { label.innerText = "満足度"; sub.innerHTML = '<option value="最高">最高</option><option value="普通">普通</option><option value="最低">最低</option>'; group.style.display = "block"; }
-            else { group.style.display = "none"; }
+        function startLocationWatch() {
+            if (!navigator.geolocation) return;
+            navigator.geolocation.watchPosition(p => {
+                const lat = p.coords.latitude;
+                const lng = p.coords.longitude;
+                const pos = [lat, lng];
+                
+                if (!currentPosMarker) {
+                    // 初回：現在地マーク作成（青い光る丸）
+                    currentPosMarker = L.circleMarker(pos, {
+                        radius: 8,
+                        fillColor: "#3498db",
+                        color: "#fff",
+                        weight: 3,
+                        fillOpacity: 1
+                    }).addTo(map);
+                    currentPosMarker.bindTooltip("現在地", { permanent: false, direction: 'top' });
+                    map.setView(pos, 16); // 最初だけズーム
+                } else {
+                    // 2回目以降：位置だけ更新
+                    currentPosMarker.setLatLng(pos);
+                }
+                window.latestPos = pos;
+            }, err => console.log(err), { enableHighAccuracy: true });
         }
 
-        function openSpotModal(lat, lng, id = null) {
-            editTargetId = id;
-            document.getElementById('spotModal').style.display = 'block';
-            document.getElementById('deleteBtn').style.display = id ? 'block' : 'none';
-            if (id) {
-                const s = allSpots[id]; document.getElementById('mainCat').value = s.mainCat; updateSubCat();
-                document.getElementById('subCat').value = s.subCat; document.getElementById('spotComment').value = s.comment;
-                document.getElementById('spotInfo').innerText = `記録者: ${s.rider} / ${s.time}`;
+        function goToCurrentLocation() {
+            if (window.latestPos) {
+                map.flyTo(window.latestPos, 17);
             } else {
-                document.getElementById('mainCat').value = ""; document.getElementById('subCatGroup').style.display = "none"; document.getElementById('spotComment').value = "";
-                document.getElementById('spotInfo').innerText = `記録者: ${RIDERS[currentRiderIdx]} / ${new Date().toLocaleString()}`;
-                window.tempLat = lat; window.tempLng = lng;
+                alert("現在地を取得中です...");
             }
         }
+
+        // --- 以下、既存のロジック（そのまま統合） ---
+        async function fetchCloudSales() { try { const res = await fetch(DB_SALES); const cloud = await res.json(); if (cloud) { allData = cloud; renderApp(); } } catch (e) {} }
+        function renderApp() {
+            const name = RIDERS[currentRiderIdx], data = allData[name] || { goal: 500000, sales: {} };
+            let labels = [], chartSales = [], chartExpense = [], chartHourly = [], chartNetHourly = [], tSales = 0, tExp = 0, tHours = 0;
+            const y = referenceDate.getFullYear(), m = referenceDate.getMonth();
+            const last = currentView === 'month' ? new Date(y, m + 1, 0).getDate() : 7;
+            if (currentView === 'month') document.getElementById('periodLabel').innerText = `${y}年${m + 1}月`;
+            else { const mon = new Date(referenceDate); mon.setDate(referenceDate.getDate() - (referenceDate.getDay() || 7) + 1); document.getElementById('periodLabel').innerText = `${mon.getMonth()+1}/${mon.getDate()}〜`; }
+            for (let i = 1; i <= last; i++) {
+                let key, label;
+                if (currentView === 'month') { key = `${y}-${String(m + 1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; label = i; }
+                else { const mon = new Date(referenceDate); mon.setDate(referenceDate.getDate() - (referenceDate.getDay() || 7) + 1); const d = new Date(mon); d.setDate(mon.getDate() + i - 1); key = d.toISOString().split('T')[0]; label = ['月','火','水','木','金','土','日'][i-1]; }
+                labels.push(label); const s = data.sales[key] || {};
+                const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
+                chartSales.push(ds); chartExpense.push(de); chartHourly.push(dh > 0 ? Math.round(ds / dh) : 0); chartNetHourly.push(dh > 0 ? Math.round((ds - de) / dh) : 0);
+                tSales += ds; tExp += de; tHours += dh;
+            }
+            document.getElementById('totalSales').innerText = tSales.toLocaleString() + "円"; document.getElementById('netProfit').innerText = (tSales - tExp).toLocaleString() + "円";
+            document.getElementById('totalHours').innerText = tHours + "h"; document.getElementById('avgHourly').innerText = tHours > 0 ? Math.round(tSales / tHours).toLocaleString() + "円" : "0円";
+            document.getElementById('netHourly').innerText = tHours > 0 ? Math.round((tSales - tExp) / tHours).toLocaleString() + "円" : "0円";
+            document.getElementById('displayGoal').innerText = (data.goal||0).toLocaleString() + "円"; document.getElementById('displayRemaining').innerText = Math.max(0, (data.goal||0) - tSales).toLocaleString() + "円";
+            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 8 } } } } };
+            if (myChart) myChart.destroy(); myChart = new Chart(document.getElementById('salesChart'), { type: 'bar', data: { labels, datasets: [{ data: chartSales, backgroundColor: '#3498db' }] }, options: opt });
+            if (myExpenseChart) myExpenseChart.destroy(); myExpenseChart = new Chart(document.getElementById('expenseChart'), { type: 'bar', data: { labels, datasets: [{ data: chartExpense, backgroundColor: '#e06287' }] }, options: opt });
+            if (myHourlyChart) myHourlyChart.destroy(); myHourlyChart = new Chart(document.getElementById('hourlyChart'), { type: 'line', data: { labels, datasets: [{ data: chartHourly, borderColor: '#f39c12', fill: false, tension: 0.3 }, { data: chartNetHourly, borderColor: '#2ecc71', fill: false, tension: 0.3 }]}, options: opt });
+        }
+        async function saveSales() { const n = RIDERS[currentRiderIdx], dkey = document.getElementById('inputDate').value; if(!allData[n].sales) allData[n].sales = {}; allData[n].sales[dkey] = { hours: Number(document.getElementById('inputHours').value) || 0, gas: Number(document.getElementById('inputGas').value) || 0, otherExp: Number(document.getElementById('inputOtherExp').value) || 0, uber: Number(document.getElementById('inputUber').value) || 0, demae: Number(document.getElementById('inputDemae').value) || 0, menu: Number(document.getElementById('inputMenu').value) || 0, rocket: Number(document.getElementById('inputRocket').value) || 0 }; closeInputModal(); localStorage.setItem('goalRider_cache', JSON.stringify(allData)); renderApp(); try { await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); } catch (e) {} }
+        function loadExistingData() { const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value; const d = (allData[n].sales && allData[n].sales[dk]) ? allData[n].sales[dk] : {}; document.getElementById('inputHours').value = d.hours || ""; document.getElementById('inputGas').value = d.gas || ""; document.getElementById('inputOtherExp').value = d.otherExp || ""; document.getElementById('inputUber').value = d.uber || ""; document.getElementById('inputDemae').value = d.demae || ""; document.getElementById('inputMenu').value = d.menu || ""; document.getElementById('inputRocket').value = d.rocket || ""; }
+        function switchRider(idx) { currentRiderIdx = idx; localStorage.setItem('goalRider_idx', idx); document.getElementById('rider0').className = 'rider-btn'+(idx==0?' rider-active':''); document.getElementById('rider1').className = 'rider-btn'+(idx==1?' rider-active':''); document.getElementById('riderDisplayName').innerText = RIDERS[idx]; renderApp(); }
+        function switchView(v) { currentView = v; document.getElementById('btnWeek').className = v=='week'?'active-view':''; document.getElementById('btnMonth').className = v=='month'?'active-view':''; renderApp(); }
+        function navigateTime(dir) { currentView === 'month' ? referenceDate.setMonth(referenceDate.getMonth()+dir) : referenceDate.setDate(referenceDate.getDate()+(dir*7)); renderApp(); }
+        function setGoal() { const n = RIDERS[currentRiderIdx], v = prompt("目標", allData[n].goal); if(v){allData[n].goal=Number(v); renderApp(); fetch(DB_SALES,{method:'PUT',body:JSON.stringify(allData)});} }
+        function openInputModal() { document.getElementById('inputModal').style.display='block'; loadExistingData(); }
+        function closeInputModal() { document.getElementById('inputModal').style.display='none'; }
+        function updateSubCat() { const main = document.getElementById('mainCat').value, sub = document.getElementById('subCat'), group = document.getElementById('subCatGroup'), label = document.getElementById('subCatLabel'); sub.innerHTML = ""; if (main === "待機") { label.innerText = "鳴りやすさ"; sub.innerHTML = '<option value="鳴るエリア">鳴るエリア</option><option value="鳴らないエリア">鳴らないエリア</option>'; group.style.display = "block"; } else if (main === "ピック" || main === "ドロップ") { label.innerText = "満足度"; sub.innerHTML = '<option value="最高">最高</option><option value="普通">普通</option><option value="最低">最低</option>'; group.style.display = "block"; } else { group.style.display = "none"; } }
+        function openSpotModal(lat, lng, id = null) { editTargetId = id; document.getElementById('spotModal').style.display = 'block'; document.getElementById('deleteBtn').style.display = id ? 'block' : 'none'; if (id) { const s = allSpots[id]; document.getElementById('mainCat').value = s.mainCat; updateSubCat(); document.getElementById('subCat').value = s.subCat; document.getElementById('spotComment').value = s.comment; document.getElementById('spotInfo').innerText = `記録者: ${s.rider} / ${s.time}`; } else { document.getElementById('mainCat').value = ""; document.getElementById('subCatGroup').style.display = "none"; document.getElementById('spotComment').value = ""; document.getElementById('spotInfo').innerText = `記録者: ${RIDERS[currentRiderIdx]} / ${new Date().toLocaleString()}`; window.tempLat = lat; window.tempLng = lng; } }
         function closeSpotModal() { document.getElementById('spotModal').style.display = 'none'; }
-
-        async function saveSpot() {
-            const main = document.getElementById('mainCat').value; if (!main) return alert("カテゴリを選択してください");
-            const spot = {
-                lat: editTargetId ? allSpots[editTargetId].lat : window.tempLat, lng: editTargetId ? allSpots[editTargetId].lng : window.tempLng,
-                mainCat: main, subCat: document.getElementById('subCat').value, comment: document.getElementById('spotComment').value,
-                rider: editTargetId ? allSpots[editTargetId].rider : RIDERS[currentRiderIdx], time: editTargetId ? allSpots[editTargetId].time : new Date().toLocaleString(),
-                day: new Date().getDay(), hour: new Date().getHours()
-            };
-            const url = editTargetId ? `${DB_MAP.replace('.json', `/${editTargetId}.json`)}` : DB_MAP;
-            try { await fetch(url, { method: editTargetId?'PUT':'POST', body: JSON.stringify(spot) }); closeSpotModal(); loadAllSpots(); } catch (e) {}
-        }
-
-        async function deleteSpot() {
-            if (!confirm("削除しますか？")) return;
-            await fetch(`${DB_MAP.replace('.json', `/${editTargetId}.json`)}`, { method: 'DELETE' });
-            closeSpotModal(); loadAllSpots();
-        }
-
-        async function loadAllSpots() {
-            const res = await fetch(DB_MAP); allSpots = await res.json() || {};
-            Object.values(mapMarkers).forEach(m => map.removeLayer(m)); mapMarkers = {};
-            Object.keys(allSpots).forEach(id => {
-                const s = allSpots[id];
-                let color = (s.subCat === "最高" || s.subCat === "鳴るエリア") ? "#2ecc71" : (s.subCat === "最低" || s.subCat === "鳴らないエリア") ? "#e74c3c" : "#f1c40f";
-                
-                const m = L.circleMarker([s.lat, s.lng], { radius: 10, fillColor: color, color: "#fff", weight: 2, fillOpacity: 0.8 }).addTo(map);
-                
-                // コメントを吹き出し（Tooltip）として表示設定
-                // permanent: true で常に表示、direction: 'right' で右側に表示
-                if (s.comment) {
-                    m.bindTooltip(s.comment, { 
-                        permanent: true, 
-                        direction: 'right', 
-                        className: 'leaflet-tooltip-own',
-                        offset: [10, 0]
-                    }).openTooltip();
-                }
-
-                m.on('click', () => openSpotModal(s.lat, s.lng, id));
-                mapMarkers[id] = m;
-            });
-        }
-
-        function openSpotList() {
-            const listDiv = document.getElementById('spotList'); listDiv.innerHTML = "";
-            Object.keys(allSpots).reverse().forEach(id => {
-                const s = allSpots[id];
-                const item = document.createElement('div'); item.className = "spot-item";
-                item.innerHTML = `<div><b>${s.mainCat}(${s.subCat})</b><br>${s.comment}</div><button onclick="editFromList('${id}')">編集</button>`;
-                listDiv.appendChild(item);
-            });
-            document.getElementById('listModal').style.display = 'block';
-        }
+        async function saveSpot() { const main = document.getElementById('mainCat').value; if (!main) return alert("カテゴリを選択してください"); const spot = { lat: editTargetId ? allSpots[editTargetId].lat : window.tempLat, lng: editTargetId ? allSpots[editTargetId].lng : window.tempLng, mainCat: main, subCat: document.getElementById('subCat').value, comment: document.getElementById('spotComment').value, rider: editTargetId ? allSpots[editTargetId].rider : RIDERS[currentRiderIdx], time: editTargetId ? allSpots[editTargetId].time : new Date().toLocaleString(), day: new Date().getDay(), hour: new Date().getHours() }; const url = editTargetId ? `${DB_MAP.replace('.json', `/${editTargetId}.json`)}` : DB_MAP; try { await fetch(url, { method: editTargetId?'PUT':'POST', body: JSON.stringify(spot) }); closeSpotModal(); loadAllSpots(); } catch (e) {} }
+        async function deleteSpot() { if (!confirm("削除しますか？")) return; await fetch(`${DB_MAP.replace('.json', `/${editTargetId}.json`)}`, { method: 'DELETE' }); closeSpotModal(); loadAllSpots(); }
+        async function loadAllSpots() { const res = await fetch(DB_MAP); allSpots = await res.json() || {}; Object.values(mapMarkers).forEach(m => map.removeLayer(m)); mapMarkers = {}; Object.keys(allSpots).forEach(id => { const s = allSpots[id]; let color = (s.subCat === "最高" || s.subCat === "鳴るエリア") ? "#2ecc71" : (s.subCat === "最低" || s.subCat === "鳴らないエリア") ? "#e74c3c" : "#f1c40f"; const m = L.circleMarker([s.lat, s.lng], { radius: 10, fillColor: color, color: "#fff", weight: 2, fillOpacity: 0.8 }).addTo(map); if (s.comment) { m.bindTooltip(s.comment, { permanent: true, direction: 'right', className: 'leaflet-tooltip-own', offset: [10, 0] }).openTooltip(); } m.on('click', () => openSpotModal(s.lat, s.lng, id)); mapMarkers[id] = m; }); }
+        function openSpotList() { const listDiv = document.getElementById('spotList'); listDiv.innerHTML = ""; Object.keys(allSpots).reverse().forEach(id => { const s = allSpots[id]; const item = document.createElement('div'); item.className = "spot-item"; item.innerHTML = `<div><b>${s.mainCat}(${s.subCat})</b><br>${s.comment}</div><button onclick="editFromList('${id}')">編集</button>`; listDiv.appendChild(item); }); document.getElementById('listModal').style.display = 'block'; }
         function editFromList(id) { document.getElementById('listModal').style.display='none'; const s=allSpots[id]; openSpotModal(s.lat, s.lng, id); }
-
-        function analyzeMap() {
-            const nowDay = new Date().getDay(), nowHour = new Date().getHours();
-            Object.keys(allSpots).forEach(id => {
-                const s = allSpots[id];
-                const isRelevant = (s.day === nowDay && Math.abs(s.hour - nowHour) <= 2);
-                mapMarkers[id].setRadius(isRelevant ? 18 : 8);
-                mapMarkers[id].setStyle({ weight: isRelevant ? 5 : 2, color: isRelevant ? '#000' : '#fff' });
-            });
-            alert("現在の時間・曜日に近いデータを強調しました！");
-        }
+        function analyzeMap() { const nowDay = new Date().getDay(), nowHour = new Date().getHours(); Object.keys(allSpots).forEach(id => { const s = allSpots[id]; const isRelevant = (s.day === nowDay && Math.abs(s.hour - nowHour) <= 2); mapMarkers[id].setRadius(isRelevant ? 18 : 8); mapMarkers[id].setStyle({ weight: isRelevant ? 5 : 2, color: isRelevant ? '#000' : '#fff' }); }); alert("現在の時間・曜日に近いデータを強調しました！"); }
     </script>
 </body>
 </html>
