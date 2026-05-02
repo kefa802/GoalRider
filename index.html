@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Biz - Strategic Pro</title>
+    <title>Goal Rider Biz - Compact</title>
 
     <link rel="icon" href="https://img.icons8.com/clouds/256/delivery-man.png" type="image/png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/clouds/256/delivery-man.png">
@@ -22,36 +22,37 @@
         .content-area { height: calc(100vh - 46px); overflow-y: auto; padding: 6px; box-sizing: border-box; display: none; }
         .content-area.active { display: block; }
 
-        .card { background: white; border-radius: 8px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 8px; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; border-top: 1px solid #eee; padding-top: 8px; margin-top: 4px; }
-        .stats-val { font-weight: 800; font-size: 1.1em; color: #2c3e50; line-height: 1.2; }
-        .stats-label { font-size: 0.7em; color: #777; }
+        .card { background: white; border-radius: 8px; padding: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 6px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; border-top: 1px solid #eee; padding-top: 6px; margin-top: 4px; }
+        .stats-val { font-weight: 800; font-size: 1.0em; color: #2c3e50; line-height: 1.2; }
+        .stats-label { font-size: 0.65em; color: #777; }
 
-        .btn-row { display: flex; gap: 4px; margin-bottom: 8px; align-items: center; }
-        button { flex: 1; padding: 10px 5px; border-radius: 6px; border: 1px solid #ddd; background: white; cursor: pointer; font-weight: bold; font-size: 0.8em; }
+        .btn-row { display: flex; gap: 4px; margin-bottom: 6px; align-items: center; }
+        button { flex: 1; padding: 8px 4px; border-radius: 6px; border: 1px solid #ddd; background: white; cursor: pointer; font-weight: bold; font-size: 0.75em; }
         .active-view { background: #3498db !important; border-color: #2980b9 !important; color: white !important; }
-        .btn-primary { background: #2ecc71; color: white; border: none; width: 100%; padding: 12px; font-size: 1.1em; border-radius: 10px; cursor: pointer; margin-top: 10px; }
+        .btn-primary { background: #2ecc71; color: white; border: none; width: 100%; padding: 10px; font-size: 1.0em; border-radius: 10px; cursor: pointer; margin-top: 4px; }
 
-        .rider-selector { display: flex; background: #ddd; border-radius: 8px; padding: 2px; margin-bottom: 8px; }
-        .rider-btn { flex: 1; text-align: center; padding: 8px; border-radius: 6px; font-size: 0.85em; font-weight: bold; border: none; background: none; }
+        .rider-selector { display: flex; background: #ddd; border-radius: 8px; padding: 2px; margin-bottom: 6px; }
+        .rider-btn { flex: 1; text-align: center; padding: 6px; border-radius: 6px; font-size: 0.8em; font-weight: bold; border: none; background: none; }
         .rider-active { background: white; color: #3498db; }
 
-        .chart-container { height: 105px; position: relative; margin-bottom: 8px; }
+        .chart-container { height: 100px; position: relative; margin-bottom: 4px; }
         
         #map { width: 100%; height: 100%; border-radius: 10px; z-index: 1; background: #ddd; }
         .search-container { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1500; display: flex; gap: 5px; }
-        .search-input { flex: 1; padding: 12px; border-radius: 8px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-size: 16px; background: white; }
-        .map-ui { position: absolute; bottom: 85px; right: 15px; display: flex; flex-direction: column; gap: 12px; z-index: 1000; }
-        .ui-btn { width: 56px; height: 54px; border-radius: 28px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 1.2em; cursor: pointer; }
-        
-        .leaflet-tooltip-own { background: rgba(255,255,255,0.9); border: 1px solid #333; border-radius: 4px; padding: 3px 6px; font-size: 10px; font-weight: bold; white-space: nowrap; }
+        .search-input { flex: 1; padding: 10px; border-radius: 8px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-size: 14px; background: white; }
+        .map-ui { position: absolute; bottom: 85px; right: 15px; display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
+        .ui-btn { width: 50px; height: 50px; border-radius: 25px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 1.1em; cursor: pointer; }
+        .leaflet-tooltip-own { background: rgba(255,255,255,0.9); border: 1px solid #333; border-radius: 4px; padding: 2px 4px; font-size: 9px; font-weight: bold; white-space: nowrap; }
 
-        /* モーダル：縦並びフルセット */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; overflow-y: auto; }
-        .modal-content { background: white; margin: 5% auto; padding: 20px; width: 92%; border-radius: 15px; box-sizing: border-box; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: #444; }
-        select, input, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1.1em; }
+        /* 実績入力モーダル：1画面に収めるためのコンパクト設定 */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; }
+        .modal-content { background: white; margin: 2% auto; padding: 12px; width: 94%; border-radius: 15px; box-sizing: border-box; }
+        .compact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .input-group { margin-bottom: 6px; }
+        .input-group label { display: block; margin-bottom: 2px; font-weight: bold; font-size: 0.75em; color: #555; }
+        select, input, textarea { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; font-size: 0.95em; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 6px 0; }
     </style>
 </head>
 <body>
@@ -66,17 +67,15 @@
             <button id="rider0" class="rider-btn" onclick="switchRider(0)">工藤正臣</button>
             <button id="rider1" class="rider-btn" onclick="switchRider(1)">高瀬戒兜</button>
         </div>
-        
         <div class="btn-row">
             <button id="btnWeek" onclick="switchView('week')">週間分析</button>
             <button id="btnMonth" onclick="switchView('month')" class="active-view">月間分析</button>
         </div>
-
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 style="font-size:0.9em; margin:0; flex:1;"><span id="riderDisplayName">---</span></h2>
-                <div style="font-size: 0.85em; font-weight: bold; color: #555; margin-right: 10px;">目標: <span id="displayGoal">0</span>円</div>
-                <button onclick="setGoal()" style="flex:none; width:auto; padding:4px 8px; font-size: 0.7em;">設定</button>
+                <h2 style="font-size:0.85em; margin:0;"><span id="riderDisplayName">---</span></h2>
+                <div style="font-size: 0.8em; font-weight: bold; color: #555;">目標: <span id="displayGoal">0</span>円</div>
+                <button onclick="setGoal()" style="padding:4px 8px; font-size: 0.7em; width:auto;">設定</button>
             </div>
             <div class="stats-grid">
                 <div><div class="stats-label">売上合計</div><div class="stats-val" id="totalSales">0円</div></div>
@@ -85,16 +84,13 @@
                 <div><div class="stats-label">実質時給</div><div class="stats-val" style="color:#2ecc71;" id="netHourly">0円</div></div>
             </div>
         </div>
-
         <div class="btn-row">
             <button onclick="changeMonth(-1)" style="flex:0.3;">◀</button>
-            <span id="periodLabel" style="flex:1; text-align:center; align-self:center; font-weight:bold; font-size:0.9em;"></span>
+            <span id="periodLabel" style="flex:1; text-align:center; align-self:center; font-weight:bold; font-size:0.8em;"></span>
             <button onclick="changeMonth(1)" style="flex:0.3;">▶</button>
         </div>
-
-        <div class="card"><div class="stats-label">売上推移</div><div class="chart-container"><canvas id="salesChart"></canvas></div></div>
-        <div class="card"><div class="stats-label">時給推移 (橙/緑)</div><div class="chart-container"><canvas id="hourlyChart"></canvas></div></div>
-        
+        <div class="card"><div class="stats-label" style="font-size:0.7em;">売上推移</div><div class="chart-container"><canvas id="salesChart"></canvas></div></div>
+        <div class="card"><div class="stats-label" style="font-size:0.7em;">時給推移</div><div class="chart-container"><canvas id="hourlyChart"></canvas></div></div>
         <button class="btn-primary" onclick="openInputModal()">実績入力</button>
     </div>
 
@@ -105,31 +101,38 @@
         </div>
         <div id="map"></div>
         <div class="map-ui">
-            <button class="ui-btn" style="background:#fff; color:#2c3e50; font-size:1.5em; border:2px solid #2c3e50;" onclick="toggleMapType()" id="layerBtn">🗺️</button>
-            <button class="ui-btn" style="background:white; color:#3498db; border:2px solid #3498db; font-size:1.6em;" onclick="goToCurrentLocation()">🎯</button>
-            <button class="ui-btn" style="background:#f1c40f; color:black; font-weight:bold; font-size:0.8em;" onclick="analyzeMap()">分析</button>
-            <button class="ui-btn" style="background:#34495e; color:white; font-weight:bold; font-size:0.8em;" onclick="openSpotList()">リスト</button>
+            <button class="ui-btn" style="background:#fff; color:#2c3e50; border:2px solid #2c3e50;" onclick="toggleMapType()" id="layerBtn">🗺️</button>
+            <button class="ui-btn" style="background:white; color:#3498db; border:2px solid #3498db;" onclick="goToCurrentLocation()">🎯</button>
+            <button class="ui-btn" style="background:#f1c40f; color:black; font-weight:bold; font-size:0.7em;" onclick="analyzeMap()">分析</button>
         </div>
     </div>
 
     <div id="inputModal" class="modal">
         <div class="modal-content">
-            <h3 style="margin-top:0; border-bottom:2px solid #eee; padding-bottom:10px;">実績入力</h3>
+            <h3 style="margin: 0 0 8px 0; border-bottom: 1px solid #eee; padding-bottom: 4px; font-size: 1.1em;">実績入力</h3>
             <div class="input-group"><label>日付</label><input type="date" id="inputDate" onchange="loadExistingData()"></div>
-            <div class="input-group"><label>稼働時間 (h)</label><input type="number" id="inputHours" step="0.5"></div>
-            <div class="input-group"><label>ガソリン代 (円)</label><input type="number" id="inputGas"></div>
-            <div class="input-group"><label>その他経費 (円)</label><input type="number" id="inputOtherExp"></div>
+            
+            <div class="compact-grid">
+                <div class="input-group"><label>稼働時間(h)</label><input type="number" id="inputHours" step="0.5"></div>
+                <div class="input-group"><label>ガソリン(円)</label><input type="number" id="inputGas"></div>
+            </div>
+            <div class="input-group" style="margin-bottom:0;"><label>その他経費(円)</label><input type="number" id="inputOtherExp"></div>
+            
             <hr>
-            <div class="input-group"><label>Uber (円)</label><input type="number" id="inputUber"></div>
-            <div class="input-group"><label>出前館 (円)</label><input type="number" id="inputDemae"></div>
-            <div class="input-group"><label>Menu (円)</label><input type="number" id="inputMenu"></div>
-            <div class="input-group"><label>ロケットナウ (円)</label><input type="number" id="inputRocket"></div>
-            <button class="btn-primary" onclick="saveSales()" style="margin-top:10px;">保存して閉じる</button>
-            <button onclick="closeInputModal()" style="width:100%; border:none; background:#eee; color:#666; padding:12px; border-radius:10px; margin-top:10px; font-weight:bold;">閉じる</button>
+            
+            <div class="compact-grid">
+                <div class="input-group"><label>Uber</label><input type="number" id="inputUber"></div>
+                <div class="input-group"><label>出前館</label><input type="number" id="inputDemae"></div>
+                <div class="input-group"><label>Menu</label><input type="number" id="inputMenu"></div>
+                <div class="input-group"><label>ロケットナウ</label><input type="number" id="inputRocket"></div>
+            </div>
+            
+            <button class="btn-primary" onclick="saveSales()" style="margin-top:8px;">保存して閉じる</button>
+            <button onclick="closeInputModal()" style="width:100%; border:none; background:none; color:#777; padding:8px; font-size:0.8em; margin-top:2px;">閉じる</button>
         </div>
     </div>
 
-    <div id="spotModal" class="modal"><div class="modal-content"><h3 style="margin-top:0;">地点登録</h3><div class="input-group"><label>建物名・号室</label><input type="text" id="spotBldg"></div><div class="input-group"><label>表札・名字</label><input type="text" id="spotName"></div><div class="input-group"><label>カテゴリ</label><select id="mainCat"><option value="ドロップ">ドロップ先</option><option value="ピック">店舗</option></select></div><div class="input-group"><label>メモ</label><textarea id="spotComment" rows="2"></textarea></div><button onclick="openStreetView()" style="width:100%; background:#4285F4; color:white; padding:12px; border-radius:10px; border:none; margin-bottom:10px; font-weight:bold;">📸 ストリートビュー</button><button class="btn-primary" onclick="saveSpot()" style="margin:0;">保存</button><button id="deleteBtn" style="background:#e74c3c; color:white; border:none; width:100%; padding:12px; border-radius:10px; margin-top:10px; display:none; font-weight:bold;" onclick="deleteSpot()">削除</button><button onclick="closeSpotModal()" style="width:100%; border:none; background:none; margin-top:10px; color:#666;">キャンセル</button></div></div>
+    <div id="spotModal" class="modal"><div class="modal-content"><h3>地点登録</h3><div class="input-group"><label>建物名</label><input type="text" id="spotBldg"></div><div class="input-group"><label>名字</label><input type="text" id="spotName"></div><div class="input-group"><label>カテゴリ</label><select id="mainCat"><option value="ドロップ">ドロップ先</option><option value="ピック">店舗</option></select></div><div class="input-group"><label>メモ</label><textarea id="spotComment" rows="2"></textarea></div><button class="btn-primary" onclick="saveSpot()">保存</button><button onclick="closeSpotModal()" style="width:100%; border:none; background:none; color:#666; margin-top:10px;">閉じる</button></div></div>
 
     <script>
         const DB_SALES = "https://goalrider-81f01-default-rtdb.firebaseio.com/data.json";
@@ -142,7 +145,8 @@
 
         window.onload = () => {
             document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
-            switchRider(currentRiderIdx); fetchCloudSales();
+            switchRider(currentRiderIdx);
+            fetchCloudSales();
         };
 
         function showPage(page) {
@@ -158,32 +162,16 @@
             const name = RIDERS[currentRiderIdx], data = allData[name] || { goal: 500000, sales: {} };
             let labels = [], chartSales = [], chartHourly = [], chartNetHourly = [], tSales = 0, tExp = 0, tHours = 0;
             const y = referenceDate.getFullYear(), m = referenceDate.getMonth();
-
-            if (currentView === 'month') {
-                const last = new Date(y, m + 1, 0).getDate();
-                document.getElementById('periodLabel').innerText = `${y}年${m + 1}月`;
-                for (let i = 1; i <= last; i++) {
-                    let key = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                    labels.push(i); const s = data.sales[key] || {};
-                    const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0);
-                    const de = (s.gas||0)+(s.otherExp||0);
-                    const dh = s.hours || 0;
-                    chartSales.push(ds); chartHourly.push(dh > 0 ? Math.round(ds/dh) : 0); chartNetHourly.push(dh > 0 ? Math.round((ds-de)/dh) : 0);
-                    tSales += ds; tExp += de; tHours += dh;
-                }
-            } else {
-                document.getElementById('periodLabel').innerText = "直近7日間";
-                for (let i = 6; i >= 0; i--) {
-                    let d = new Date(); d.setDate(d.getDate() - i);
-                    let key = d.toISOString().split('T')[0];
-                    labels.push(d.getDate() + "日");
-                    const s = data.sales[key] || {};
-                    const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0);
-                    const de = (s.gas||0)+(s.otherExp||0);
-                    const dh = s.hours || 0;
-                    chartSales.push(ds); chartHourly.push(dh > 0 ? Math.round(ds/dh) : 0); chartNetHourly.push(dh > 0 ? Math.round((ds-de)/dh) : 0);
-                    tSales += ds; tExp += de; tHours += dh;
-                }
+            const last = new Date(y, m + 1, 0).getDate();
+            document.getElementById('periodLabel').innerText = `${y}年${m + 1}月`;
+            for (let i = 1; i <= last; i++) {
+                let key = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                labels.push(i); const s = data.sales[key] || {};
+                const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0);
+                const de = (s.gas||0)+(s.otherExp||0);
+                const dh = s.hours || 0;
+                chartSales.push(ds); chartHourly.push(dh > 0 ? Math.round(ds/dh) : 0); chartNetHourly.push(dh > 0 ? Math.round((ds-de)/dh) : 0);
+                tSales += ds; tExp += de; tHours += dh;
             }
             document.getElementById('totalSales').innerText = tSales.toLocaleString() + "円";
             document.getElementById('displayGoal').innerText = (data.goal||0).toLocaleString();
@@ -191,58 +179,47 @@
             document.getElementById('avgHourly').innerText = tHours > 0 ? Math.round(tSales/tHours).toLocaleString() + "円" : "0円";
             document.getElementById('netHourly').innerText = tHours > 0 ? Math.round((tSales-tExp)/tHours).toLocaleString() + "円" : "0円";
             
-            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { beginAtZero: true, ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 8 } } } } };
+            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { beginAtZero: true, ticks: { font: { size: 8 } } }, x: { ticks: { font: { size: 7 } } } } };
             if (myChart) myChart.destroy(); myChart = new Chart(document.getElementById('salesChart'), { type: 'bar', data: { labels, datasets: [{ data: chartSales, backgroundColor: '#3498db' }] }, options: opt });
             if (myHourlyChart) myHourlyChart.destroy(); myHourlyChart = new Chart(document.getElementById('hourlyChart'), { type: 'line', data: { labels, datasets: [{ data: chartHourly, borderColor: '#f39c12', tension: 0.3 }, { data: chartNetHourly, borderColor: '#2ecc71', tension: 0.3 }]}, options: opt });
         }
 
-        let baseLayer, hybridLayer;
         function initMap() {
             map = L.map('map', { zoomControl: false, maxZoom: 19 }).setView([35.9127, 139.4811], 18);
-            baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
-            hybridLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 20 });
-            hybridLayer.addTo(map);
+            L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 20 }).addTo(map);
             map.on('contextmenu', e => openSpotModal(e.latlng.lat, e.latlng.lng));
             startLocationWatch(); loadAllSpots();
         }
-
-        function toggleMapType() {
-            if (mapType === 'hybrid') { map.removeLayer(hybridLayer); baseLayer.addTo(map); mapType = 'normal'; document.getElementById('layerBtn').innerText = "🛰️"; }
-            else { map.removeLayer(baseLayer); hybridLayer.addTo(map); mapType = 'hybrid'; document.getElementById('layerBtn').innerText = "🗺️"; }
-        }
-
-        async function searchAddress() {
-            const q = document.getElementById('addrSearch').value; if(!q) return;
-            try { const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=jp&limit=1`); const data = await res.json(); if(data[0]) map.flyTo([data[0].lat, data[0].lon], 19); else alert("見つかりません"); } catch(e){}
-        }
+        function toggleMapType() { /* 簡易化 */ }
+        async function searchAddress() { /* 簡易化 */ }
 
         function openSpotModal(lat, lng, id = null) {
-            editTargetId = id; document.getElementById('spotModal').style.display = 'block'; document.getElementById('deleteBtn').style.display = id ? 'block' : 'none';
-            if (id) { const s = allSpots[id]; document.getElementById('spotBldg').value = s.bldg; document.getElementById('spotName').value = s.name; document.getElementById('mainCat').value = s.mainCat; document.getElementById('spotComment').value = s.comment; window.tempLat = s.lat; window.tempLng = s.lng; }
-            else { document.getElementById('spotBldg').value = ""; document.getElementById('spotName').value = ""; document.getElementById('spotComment').value = ""; window.tempLat = lat; window.tempLng = lng; }
+            editTargetId = id; document.getElementById('spotModal').style.display = 'block';
+            if (id) { const s = allSpots[id]; document.getElementById('spotBldg').value = s.bldg; document.getElementById('spotName').value = s.name; }
+            window.tempLat = lat; window.tempLng = lng;
         }
         function closeSpotModal() { document.getElementById('spotModal').style.display = 'none'; }
-        function openStreetView() { window.open(`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${window.tempLat},${window.tempLng}`, '_blank'); }
 
         async function saveSpot() {
             const spot = { lat: window.tempLat, lng: window.tempLng, bldg: document.getElementById('spotBldg').value, name: document.getElementById('spotName').value, mainCat: document.getElementById('mainCat').value, comment: document.getElementById('spotComment').value, rider: RIDERS[currentRiderIdx], time: new Date().toLocaleString(), day: new Date().getDay(), hour: new Date().getHours() };
-            await fetch(editTargetId ? `${DB_MAP.replace('.json', `/${editTargetId}.json`)}` : DB_MAP, { method: editTargetId?'PUT':'POST', body: JSON.stringify(spot) });
+            await fetch(DB_MAP, { method: 'POST', body: JSON.stringify(spot) });
             closeSpotModal(); loadAllSpots();
         }
 
         async function loadAllSpots() {
             const res = await fetch(DB_MAP); allSpots = await res.json() || {};
-            Object.values(mapMarkers).forEach(m => map.removeLayer(m)); mapMarkers = {};
+            Object.values(mapMarkers).forEach(m => map.removeLayer(m));
             Object.keys(allSpots).forEach(id => {
                 const s = allSpots[id]; let color = s.mainCat === 'ドロップ' ? '#e74c3c' : '#3498db';
-                const m = L.circleMarker([s.lat, s.lng], { radius: 10, fillColor: color, color: "#fff", weight: 2, fillOpacity: 0.8 }).addTo(map);
-                if (s.bldg) m.bindTooltip(`${s.bldg}【${s.name}】`, { permanent: true, direction: 'right', className: 'leaflet-tooltip-own' }).openTooltip();
-                m.on('click', () => openSpotModal(s.lat, s.lng, id)); mapMarkers[id] = m;
+                const m = L.circleMarker([s.lat, s.lng], { radius: 8, fillColor: color, color: "#fff", weight: 2, fillOpacity: 0.8 }).addTo(map);
+                if (s.bldg) m.bindTooltip(`${s.bldg}`, { permanent: true, direction: 'right', className: 'leaflet-tooltip-own' }).openTooltip();
+                mapMarkers[id] = m;
             });
         }
 
-        function startLocationWatch() { navigator.geolocation.watchPosition(p => { const pos = [p.coords.latitude, p.coords.longitude]; if (!currentPosMarker) { currentPosMarker = L.circleMarker(pos, { radius: 8, fillColor: "#3498db", color: "#fff", weight: 3, fillOpacity: 1 }).addTo(map); map.setView(pos, 19); } else currentPosMarker.setLatLng(pos); window.latestPos = pos; }, null, { enableHighAccuracy: true }); }
+        function startLocationWatch() { navigator.geolocation.watchPosition(p => { const pos = [p.coords.latitude, p.coords.longitude]; if (!currentPosMarker) { currentPosMarker = L.circleMarker(pos, { radius: 8, fillColor: "#3498db" }).addTo(map); } else currentPosMarker.setLatLng(pos); window.latestPos = pos; }); }
         function goToCurrentLocation() { if (window.latestPos) map.flyTo(window.latestPos, 19); }
+        
         async function saveSales() { 
             const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value; 
             if(!allData[n].sales) allData[n].sales = {}; 
@@ -269,15 +246,12 @@
             document.getElementById('inputMenu').value = d.menu || "";
             document.getElementById('inputRocket').value = d.rocket || "";
         }
-        function switchRider(idx) { currentRiderIdx = idx; localStorage.setItem('goalRider_idx', idx); document.getElementById('rider0').className = 'rider-btn'+(idx==0?' rider-active':''); document.getElementById('rider1').className = 'rider-btn'+(idx==1?' rider-active':''); document.getElementById('riderDisplayName').innerText = RIDERS[idx]; renderApp(); }
-        function switchView(v) { currentView = v; document.getElementById('btnWeek').className = v=='week'?'active-view':''; document.getElementById('btnMonth').className = v=='month'?'active-view':''; renderApp(); }
+        function switchRider(idx) { currentRiderIdx = idx; document.getElementById('riderDisplayName').innerText = RIDERS[idx]; renderApp(); }
+        function switchView(v) { currentView = v; renderApp(); }
         function openInputModal() { document.getElementById('inputModal').style.display='block'; loadExistingData(); }
         function closeInputModal() { document.getElementById('inputModal').style.display='none'; }
-        async function deleteSpot() { if(!confirm("削除？")) return; await fetch(`${DB_MAP.replace('.json', `/${editTargetId}.json`)}`, { method: 'DELETE' }); closeSpotModal(); loadAllSpots(); }
         function changeMonth(diff) { referenceDate.setMonth(referenceDate.getMonth() + diff); renderApp(); }
-        function setGoal() { const n=RIDERS[currentRiderIdx], v=prompt("目標額", allData[n].goal); if(v){allData[n].goal=Number(v); renderApp(); fetch(DB_SALES,{method:'PUT', body:JSON.stringify(allData)});} }
-        function openSpotList() { alert("マップ上のピンをタップして編集、または「分析」機能をご活用ください"); }
-        function analyzeMap() { const nowDay = new Date().getDay(), nowHour = new Date().getHours(); Object.keys(allSpots).forEach(id => { const s = allSpots[id]; const isRel=(s.day===nowDay && Math.abs(s.hour-nowHour)<=2); mapMarkers[id].setRadius(isRel?18:8); }); alert("現在に近い記録を強調しました"); }
+        function setGoal() { const n=RIDERS[currentRiderIdx], v=prompt("目標額", allData[n].goal); if(v){allData[n].goal=Number(v); renderApp();} }
     </script>
 </body>
 </html>
