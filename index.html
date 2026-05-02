@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Biz Final Plus</title>
+    <title>Goal Rider Biz Final Focus</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -20,10 +20,10 @@
         .card { background: white; border-radius: 8px; padding: 6px 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 4px; }
         .card-title { font-size: 0.65em; color: #555; margin-bottom: 2px; font-weight: bold; text-align: center; }
         
-        /* 統計エリアを3行2列に変更して見やすく */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; margin-top: 4px; border-top: 1px solid #eee; padding-top: 4px; }
-        .stats-val { font-weight: bold; font-size: 0.85em; color: #2c3e50; }
-        .stats-label { font-size: 0.6em; color: #888; }
+        /* 統計エリアの数値を強調 */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; margin-top: 4px; border-top: 1px solid #eee; padding-top: 6px; }
+        .stats-val { font-weight: 800; font-size: 1.1em; color: #2c3e50; line-height: 1.2; }
+        .stats-label { font-size: 0.7em; color: #777; margin-bottom: 1px; }
 
         .btn-row { display: flex; gap: 4px; margin-bottom: 4px; }
         button { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #ddd; background: white; cursor: pointer; font-weight: bold; font-size: 0.8em; }
@@ -36,11 +36,10 @@
         .rider-active { background: white; color: #3498db; }
 
         .chart-container { height: 100px; position: relative; }
-        .chart-container-mini { height: 60px; position: relative; }
+        .chart-container-mini { height: 55px; position: relative; }
 
         #map { width: 100%; height: 75vh; border-radius: 10px; }
 
-        /* モーダル */
         #inputModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; overflow-y: auto; }
         .modal-content { background: white; margin: 5% auto; padding: 20px; width: 90%; border-radius: 15px; box-sizing: border-box; }
         .input-group { margin-bottom: 15px; }
@@ -63,8 +62,8 @@
         
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 style="margin:0; font-size:0.85em; color:#666;"><span id="riderDisplayName">---</span> 目標: <span id="displayGoal">0</span>円</h2>
-                <button onclick="setGoal()" style="padding: 2px 8px; font-size: 0.7em; width: auto; border: 1px solid #ccc;">設定</button>
+                <h2 style="margin:0; font-size:0.9em; color:#666;"><span id="riderDisplayName">---</span> 目標: <span id="displayGoal">0</span>円</h2>
+                <button onclick="setGoal()" style="padding: 2px 8px; font-size: 0.7em; width: auto; border: 1px solid #ccc; border-radius: 4px;">設定</button>
             </div>
             <div class="stats-grid">
                 <div><div class="stats-label">売上合計</div><div class="stats-val" id="totalSales">0円</div></div>
@@ -72,7 +71,7 @@
                 <div><div class="stats-label">売上時給</div><div class="stats-val" style="color:#f39c12;" id="avgHourly">0円</div></div>
                 <div><div class="stats-label">実質時給</div><div class="stats-val" style="color:#2ecc71;" id="netHourly">0円</div></div>
                 <div><div class="stats-label">稼働時間</div><div class="stats-val" id="totalHours">0h</div></div>
-                <div><div class="stats-label" style="color:#e74c3c;">目標まで</div><div class="stats-val" id="displayRemaining" style="color:#e74c3c;">0円</div></div>
+                <div><div class="stats-label" style="color:#e74c3c; font-weight:bold;">目標まで</div><div class="stats-val" id="displayRemaining" style="color:#e74c3c;">0円</div></div>
             </div>
         </div>
 
@@ -80,7 +79,7 @@
             <button id="btnWeek" onclick="switchView('week')">週次</button>
             <button id="btnMonth" onclick="switchView('month')" class="active-view">月次</button>
             <button onclick="navigateTime(-1)" style="flex:0.25;">◀</button>
-            <span id="periodLabel" style="flex:1; text-align:center; align-self:center; font-weight:bold; font-size:0.75em;"></span>
+            <span id="periodLabel" style="flex:1; text-align:center; align-self:center; font-weight:bold; font-size:0.8em;"></span>
             <button onclick="navigateTime(1)" style="flex:0.25;">▶</button>
         </div>
         
@@ -181,7 +180,7 @@
             document.getElementById('totalHours').innerText = tHours + "h";
             document.getElementById('avgHourly').innerText = tHours > 0 ? Math.round(tSales / tHours).toLocaleString() + "円" : "0円";
             document.getElementById('netHourly').innerText = tHours > 0 ? Math.round((tSales - tExp) / tHours).toLocaleString() + "円" : "0円";
-            document.getElementById('displayGoal').innerText = data.goal.toLocaleString();
+            document.getElementById('displayGoal').innerText = data.goal.toLocaleString() + "円";
             document.getElementById('displayRemaining').innerText = Math.max(0, data.goal - tSales).toLocaleString() + "円";
 
             const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 8 } } } } };
