@@ -262,3 +262,16 @@
             if(!currentPos) return alert("GPSが取得できません");
             const spot = { lat: currentPos[0], lng: currentPos[1], type: type, time: new Date().toISOString(), rider: RIDERS[currentRiderIdx] };
             try {
+                await fetch(DB_MAP, { method: 'POST', body: JSON.stringify(spot) });
+                addMarker(spot);
+            } catch(e) { alert("保存失敗"); }
+        }
+
+        function addMarker(spot) {
+            const color = spot.type === 'hit' ? '#e74c3c' : '#3498db';
+            L.circleMarker([spot.lat, spot.lng], { radius: 8, fillColor: color, color: "#fff", weight: 2, fillOpacity: 0.7 }).addTo(map)
+             .bindPopup(`${spot.rider}<br>${new Date(spot.time).toLocaleTimeString()}<br>${spot.type==='hit'?'鳴った！':'待機'}`);
+        }
+    </script>
+</body>
+</html>
