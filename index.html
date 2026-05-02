@@ -16,4 +16,118 @@
         
         /* 入力用モーダル */
         #inputModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; }
-        .modal-content { background: white; margin
+        .modal-content { background: white; margin: 10% auto; padding: 20px; width: 80%; border-radius: 15px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        .input-group input { width: 92%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 1.1em; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="goal-info">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>目標: <span id="displayGoal">500,000</span>円</h2>
+                <button onclick="setGoal()" style="flex:none; padding: 5px 15px; font-size: 0.8em;">設定</button>
+            </div>
+            <div>現在: <span id="displayCurrent">0</span>円</div>
+            <div class="remaining">残り: <span id="displayRemaining">500,000</span>円</div>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button onclick="alert('日次表示に切り替え（開発中）')">日</button>
+        <button onclick="alert('週次表示に切り替え（開発中）')">週次</button>
+        <button onclick="alert('月次表示に切り替え（開発中）')">月次</button>
+    </div>
+
+    <div class="card">
+        <canvas id="salesChart"></canvas>
+    </div>
+
+    <button class="btn-primary" onclick="openModal()">売上を入力する</button>
+
+    <div id="inputModal">
+        <div class="modal-content">
+            <h3 style="margin-top:0;">売上入力</h3>
+            <div class="input-group"><label>Uber</label><input type="number" id="inputUber" inputmode="numeric" placeholder="0"></div>
+            <div class="input-group"><label>出前館</label><input type="number" id="inputDemae" inputmode="numeric" placeholder="0"></div>
+            <div class="input-group"><label>Menu</label><input type="number" id="inputMenu" inputmode="numeric" placeholder="0"></div>
+            <div class="input-group"><label>ロケットナウ</label><input type="number" id="inputRocket" inputmode="numeric" placeholder="0"></div>
+            <div class="modal-btns">
+                <button onclick="closeModal()">戻る</button>
+                <button class="btn-primary" style="margin-top:0;" onclick="saveSales()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 目標金額の初期値（保存されていればそれを読み込む）
+        let goal = Number(localStorage.getItem('goalRiderGoal')) || 500000;
+        let salesData = JSON.parse(localStorage.getItem('goalRiderSales')) || [];
+
+        function setGoal() {
+            const newGoal = prompt("目標金額を入力してください", goal);
+            if (newGoal !== null) {
+                goal = Number(newGoal);
+                localStorage.setItem('goalRiderGoal', goal);
+                renderApp();
+            }
+        }
+
+        function openModal() { document.getElementById('inputModal').style.display = 'block'; }
+        function closeModal() { document.getElementById('inputModal').style.display = 'none'; }
+
+        function saveSales() {
+            const data = {
+                date: new Date().toLocaleDateString('ja-JP', {month:'numeric', day:'numeric'}),
+                uber: Number(document.getElementById('inputUber').value) || 0,
+                demae: Number(document.getElementById('inputDemae').value) || 0,
+                menu: Number(document.getElementById('inputMenu').value) || 0,
+                rocket: Number(document.getElementById('inputRocket').value) || 0
+            };
+            salesData.push(data);
+            localStorage.setItem('goalRiderSales', JSON.stringify(salesData));
+            closeModal();
+            renderApp();
+            // 入力欄をリセット
+            document.querySelectorAll('.modal-content input').forEach(i => i.value = '');
+        }
+
+        function renderApp() {
+            // 表示の更新
+            const currentSales = salesData.reduce((sum, d) => sum + d.uber + d.demae + d.menu + d.rocket, 0);
+            document.getElementById('displayGoal').innerText = goal.toLocaleString();
+            document.getElementById('displayCurrent').innerText = currentSales.toLocaleString();
+            document.getElementById('displayRemaining').innerText = Math.max(0, goal - currentSales).toLocaleString();
+
+            // グラフの更新
+            const chartLabels = salesData.slice(-7).map(d => d.date); // 直近7件
+            const chartValues = salesData.slice(-7).map(d => d.uber + d.demae + d.menu + d.rocket);
+
+            if (window.myChart) window.myChart.destroy();
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            window.myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: '売上合計',
+                        data: chartValues,
+                        backgroundColor: '#3498db',
+                        borderRadius: 5
+                    }]
+                },
+                options: { 
+                    responsive: true,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // 初回起動時の描画
+        renderApp();
+    </script>
+</body>
+</html>
