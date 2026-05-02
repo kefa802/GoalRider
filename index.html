@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Biz - Final Edition</title>
+    <title>Goal Rider Biz - Strategic Pro</title>
 
     <link rel="icon" href="https://img.icons8.com/clouds/256/delivery-man.png" type="image/png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/clouds/256/delivery-man.png">
@@ -37,9 +37,7 @@
         .rider-active { background: white; color: #3498db; }
 
         .chart-container { height: 105px; position: relative; margin-bottom: 8px; }
-        .chart-container-mini { height: 60px; position: relative; margin-bottom: 8px; }
-
-        /* MAP */
+        
         #map { width: 100%; height: 100%; border-radius: 10px; z-index: 1; background: #ddd; }
         .search-container { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1500; display: flex; gap: 5px; }
         .search-input { flex: 1; padding: 12px; border-radius: 8px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-size: 16px; background: white; }
@@ -48,12 +46,12 @@
         
         .leaflet-tooltip-own { background: rgba(255,255,255,0.9); border: 1px solid #333; border-radius: 4px; padding: 3px 6px; font-size: 10px; font-weight: bold; white-space: nowrap; }
 
-        /* モーダル：ここを復元 */
+        /* モーダル：縦並びフルセット */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; overflow-y: auto; }
-        .modal-content { background: white; margin: 5% auto; padding: 20px; width: 92%; border-radius: 15px; box-sizing: border-box; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .modal-content { background: white; margin: 5% auto; padding: 20px; width: 92%; border-radius: 15px; box-sizing: border-box; }
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: #444; }
-        select, input, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1.1em; appearance: none; -webkit-appearance: none; }
+        select, input, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1.1em; }
     </style>
 </head>
 <body>
@@ -95,7 +93,7 @@
         </div>
 
         <div class="card"><div class="stats-label">売上推移</div><div class="chart-container"><canvas id="salesChart"></canvas></div></div>
-        <div class="card"><div class="stats-label">時給推移 (橙:売上/緑:実質)</div><div class="chart-container"><canvas id="hourlyChart"></canvas></div></div>
+        <div class="card"><div class="stats-label">時給推移 (橙/緑)</div><div class="chart-container"><canvas id="hourlyChart"></canvas></div></div>
         
         <button class="btn-primary" onclick="openInputModal()">実績入力</button>
     </div>
@@ -103,7 +101,7 @@
     <div id="pageMap" class="content-area" style="position: relative; padding:0;">
         <div class="search-container">
             <input type="text" id="addrSearch" class="search-input" placeholder="住所・建物名検索" onkeypress="if(event.key==='Enter')searchAddress()">
-            <button onclick="searchAddress()" style="background:#3498db; color:white; border:none; border-radius:8px; width:65px; font-weight:bold;">検索</button>
+            <button onclick="searchAddress()" style="background:#3498db; color:white; border:none; border-radius:8px; width:60px; font-weight:bold;">検索</button>
         </div>
         <div id="map"></div>
         <div class="map-ui">
@@ -117,49 +115,21 @@
     <div id="inputModal" class="modal">
         <div class="modal-content">
             <h3 style="margin-top:0; border-bottom:2px solid #eee; padding-bottom:10px;">実績入力</h3>
-            <div class="input-group">
-                <label>日付</label>
-                <input type="date" id="inputDate" onchange="loadExistingData()">
-            </div>
-            <div class="input-group">
-                <label>稼働時間 (h)</label>
-                <input type="number" id="inputHours" step="0.5" placeholder="例: 8.5">
-            </div>
-            <div class="input-group">
-                <label>ガソリン代 (円)</label>
-                <input type="number" id="inputGas" placeholder="例: 1200">
-            </div>
-            <div class="input-group">
-                <label>Uber売上 (円)</label>
-                <input type="number" id="inputUber" placeholder="例: 12000">
-            </div>
-            <div class="input-group">
-                <label>出前館売上 (円)</label>
-                <input type="number" id="inputDemae" placeholder="例: 5000">
-            </div>
+            <div class="input-group"><label>日付</label><input type="date" id="inputDate" onchange="loadExistingData()"></div>
+            <div class="input-group"><label>稼働時間 (h)</label><input type="number" id="inputHours" step="0.5"></div>
+            <div class="input-group"><label>ガソリン代 (円)</label><input type="number" id="inputGas"></div>
+            <div class="input-group"><label>その他経費 (円)</label><input type="number" id="inputOtherExp"></div>
+            <hr>
+            <div class="input-group"><label>Uber (円)</label><input type="number" id="inputUber"></div>
+            <div class="input-group"><label>出前館 (円)</label><input type="number" id="inputDemae"></div>
+            <div class="input-group"><label>Menu (円)</label><input type="number" id="inputMenu"></div>
+            <div class="input-group"><label>ロケットナウ (円)</label><input type="number" id="inputRocket"></div>
             <button class="btn-primary" onclick="saveSales()" style="margin-top:10px;">保存して閉じる</button>
             <button onclick="closeInputModal()" style="width:100%; border:none; background:#eee; color:#666; padding:12px; border-radius:10px; margin-top:10px; font-weight:bold;">閉じる</button>
         </div>
     </div>
 
-    <div id="spotModal" class="modal">
-        <div class="modal-content">
-            <h3 style="margin-top:0;">地点登録</h3>
-            <div class="input-group"><label>建物名・号室</label><input type="text" id="spotBldg"></div>
-            <div class="input-group"><label>表札・名字</label><input type="text" id="spotName"></div>
-            <div class="input-group">
-                <label>カテゴリ</label>
-                <select id="mainCat"><option value="ドロップ">ドロップ先</option><option value="ピック">店舗</option></select>
-            </div>
-            <div class="input-group"><label>メモ</label><textarea id="spotComment" rows="2"></textarea></div>
-            <button onclick="openStreetView()" style="width:100%; background:#4285F4; color:white; padding:12px; border-radius:10px; border:none; margin-bottom:10px; font-weight:bold;">📸 ストリートビュー</button>
-            <button class="btn-primary" onclick="saveSpot()" style="margin:0;">保存</button>
-            <button id="deleteBtn" style="background:#e74c3c; color:white; border:none; width:100%; padding:12px; border-radius:10px; margin-top:10px; display:none; font-weight:bold;" onclick="deleteSpot()">削除</button>
-            <button onclick="closeSpotModal()" style="width:100%; border:none; background:none; margin-top:10px; color:#666;">キャンセル</button>
-        </div>
-    </div>
-
-    <div id="listModal" class="modal"><div class="modal-content"><h3>スポット一覧</h3><div id="spotList" style="max-height:300px; overflow-y:auto;"></div><button class="btn-primary" onclick="document.getElementById('listModal').style.display='none'" style="margin-top:15px;">閉じる</button></div></div>
+    <div id="spotModal" class="modal"><div class="modal-content"><h3 style="margin-top:0;">地点登録</h3><div class="input-group"><label>建物名・号室</label><input type="text" id="spotBldg"></div><div class="input-group"><label>表札・名字</label><input type="text" id="spotName"></div><div class="input-group"><label>カテゴリ</label><select id="mainCat"><option value="ドロップ">ドロップ先</option><option value="ピック">店舗</option></select></div><div class="input-group"><label>メモ</label><textarea id="spotComment" rows="2"></textarea></div><button onclick="openStreetView()" style="width:100%; background:#4285F4; color:white; padding:12px; border-radius:10px; border:none; margin-bottom:10px; font-weight:bold;">📸 ストリートビュー</button><button class="btn-primary" onclick="saveSpot()" style="margin:0;">保存</button><button id="deleteBtn" style="background:#e74c3c; color:white; border:none; width:100%; padding:12px; border-radius:10px; margin-top:10px; display:none; font-weight:bold;" onclick="deleteSpot()">削除</button><button onclick="closeSpotModal()" style="width:100%; border:none; background:none; margin-top:10px; color:#666;">キャンセル</button></div></div>
 
     <script>
         const DB_SALES = "https://goalrider-81f01-default-rtdb.firebaseio.com/data.json";
@@ -172,8 +142,7 @@
 
         window.onload = () => {
             document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
-            switchRider(currentRiderIdx);
-            fetchCloudSales();
+            switchRider(currentRiderIdx); fetchCloudSales();
         };
 
         function showPage(page) {
@@ -196,7 +165,9 @@
                 for (let i = 1; i <= last; i++) {
                     let key = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
                     labels.push(i); const s = data.sales[key] || {};
-                    const ds = (s.uber||0)+(s.demae||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
+                    const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0);
+                    const de = (s.gas||0)+(s.otherExp||0);
+                    const dh = s.hours || 0;
                     chartSales.push(ds); chartHourly.push(dh > 0 ? Math.round(ds/dh) : 0); chartNetHourly.push(dh > 0 ? Math.round((ds-de)/dh) : 0);
                     tSales += ds; tExp += de; tHours += dh;
                 }
@@ -207,7 +178,9 @@
                     let key = d.toISOString().split('T')[0];
                     labels.push(d.getDate() + "日");
                     const s = data.sales[key] || {};
-                    const ds = (s.uber||0)+(s.demae||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
+                    const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0);
+                    const de = (s.gas||0)+(s.otherExp||0);
+                    const dh = s.hours || 0;
                     chartSales.push(ds); chartHourly.push(dh > 0 ? Math.round(ds/dh) : 0); chartNetHourly.push(dh > 0 ? Math.round((ds-de)/dh) : 0);
                     tSales += ds; tExp += de; tHours += dh;
                 }
@@ -270,8 +243,32 @@
 
         function startLocationWatch() { navigator.geolocation.watchPosition(p => { const pos = [p.coords.latitude, p.coords.longitude]; if (!currentPosMarker) { currentPosMarker = L.circleMarker(pos, { radius: 8, fillColor: "#3498db", color: "#fff", weight: 3, fillOpacity: 1 }).addTo(map); map.setView(pos, 19); } else currentPosMarker.setLatLng(pos); window.latestPos = pos; }, null, { enableHighAccuracy: true }); }
         function goToCurrentLocation() { if (window.latestPos) map.flyTo(window.latestPos, 19); }
-        async function saveSales() { const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value; if(!allData[n].sales) allData[n].sales = {}; allData[n].sales[dk] = { hours: Number(document.getElementById('inputHours').value), gas: Number(document.getElementById('inputGas').value), uber: Number(document.getElementById('inputUber')), demae: Number(document.getElementById('inputDemae')) }; closeInputModal(); localStorage.setItem('goalRider_cache', JSON.stringify(allData)); renderApp(); await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); }
-        function loadExistingData() { const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value; const d = allData[n].sales[dk] || {}; document.getElementById('inputHours').value = d.hours || ""; document.getElementById('inputGas').value = d.gas || ""; document.getElementById('inputUber').value = d.uber || ""; document.getElementById('inputDemae').value = d.demae || ""; }
+        async function saveSales() { 
+            const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value; 
+            if(!allData[n].sales) allData[n].sales = {}; 
+            allData[n].sales[dk] = { 
+                hours: Number(document.getElementById('inputHours').value), 
+                gas: Number(document.getElementById('inputGas').value), 
+                otherExp: Number(document.getElementById('inputOtherExp').value),
+                uber: Number(document.getElementById('inputUber').value), 
+                demae: Number(document.getElementById('inputDemae').value),
+                menu: Number(document.getElementById('inputMenu').value),
+                rocket: Number(document.getElementById('inputRocket').value)
+            }; 
+            closeInputModal(); localStorage.setItem('goalRider_cache', JSON.stringify(allData)); renderApp(); 
+            await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); 
+        }
+        function loadExistingData() { 
+            const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value; 
+            const d = allData[n].sales[dk] || {}; 
+            document.getElementById('inputHours').value = d.hours || ""; 
+            document.getElementById('inputGas').value = d.gas || ""; 
+            document.getElementById('inputOtherExp').value = d.otherExp || "";
+            document.getElementById('inputUber').value = d.uber || ""; 
+            document.getElementById('inputDemae').value = d.demae || ""; 
+            document.getElementById('inputMenu').value = d.menu || "";
+            document.getElementById('inputRocket').value = d.rocket || "";
+        }
         function switchRider(idx) { currentRiderIdx = idx; localStorage.setItem('goalRider_idx', idx); document.getElementById('rider0').className = 'rider-btn'+(idx==0?' rider-active':''); document.getElementById('rider1').className = 'rider-btn'+(idx==1?' rider-active':''); document.getElementById('riderDisplayName').innerText = RIDERS[idx]; renderApp(); }
         function switchView(v) { currentView = v; document.getElementById('btnWeek').className = v=='week'?'active-view':''; document.getElementById('btnMonth').className = v=='month'?'active-view':''; renderApp(); }
         function openInputModal() { document.getElementById('inputModal').style.display='block'; loadExistingData(); }
@@ -279,7 +276,7 @@
         async function deleteSpot() { if(!confirm("削除？")) return; await fetch(`${DB_MAP.replace('.json', `/${editTargetId}.json`)}`, { method: 'DELETE' }); closeSpotModal(); loadAllSpots(); }
         function changeMonth(diff) { referenceDate.setMonth(referenceDate.getMonth() + diff); renderApp(); }
         function setGoal() { const n=RIDERS[currentRiderIdx], v=prompt("目標額", allData[n].goal); if(v){allData[n].goal=Number(v); renderApp(); fetch(DB_SALES,{method:'PUT', body:JSON.stringify(allData)});} }
-        function openSpotList() { alert("一覧はマップ上の各マーカーまたはリスト機能で確認可能です"); }
+        function openSpotList() { alert("マップ上のピンをタップして編集、または「分析」機能をご活用ください"); }
         function analyzeMap() { const nowDay = new Date().getDay(), nowHour = new Date().getHours(); Object.keys(allSpots).forEach(id => { const s = allSpots[id]; const isRel=(s.day===nowDay && Math.abs(s.hour-nowHour)<=2); mapMarkers[id].setRadius(isRel?18:8); }); alert("現在に近い記録を強調しました"); }
     </script>
 </body>
