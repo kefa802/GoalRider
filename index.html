@@ -3,52 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Biz Pro Charts</title>
+    <title>Goal Rider Biz Ultra Compact</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        /* メイン画面はコンパクトを維持、スクロール可能に */
         body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 0; color: #333; height: 100vh; overflow: hidden; }
-        .main-tabs { display: flex; background: #2c3e50; padding: 2px; gap: 2px; z-index: 10; position: relative; }
-        .tab-btn { flex: 1; padding: 8px; border: none; background: none; color: #bdc3c7; font-weight: bold; font-size: 0.85em; border-radius: 6px; }
+        .main-tabs { display: flex; background: #2c3e50; padding: 2px; gap: 2px; }
+        .tab-btn { flex: 1; padding: 6px; border: none; background: none; color: #bdc3c7; font-weight: bold; font-size: 0.8em; border-radius: 4px; }
         .tab-btn.active { background: #34495e; color: white; }
         
-        .content-area { height: calc(100vh - 40px); overflow-y: auto; padding: 8px; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
+        .content-area { height: calc(100vh - 36px); overflow-y: auto; padding: 6px; box-sizing: border-box; }
         .content-area { display: none; }
         .content-area.active { display: block; }
 
-        .card { background: white; border-radius: 10px; padding: 10px; box-shadow: 0 1px 5px rgba(0,0,0,0.1); margin-bottom: 8px; }
-        .card-title { font-size: 0.75em; color: #666; margin-bottom: 4px; font-weight: bold; text-align: center;}
-        .remaining { color: #e74c3c; font-weight: bold; font-size: 1.1em; margin-top: 4px; text-align: center; }
+        .card { background: white; border-radius: 8px; padding: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 6px; }
+        .card-title { font-size: 0.65em; color: #666; margin-bottom: 2px; font-weight: bold; text-align: center; }
+        .remaining { color: #e74c3c; font-weight: bold; font-size: 1em; margin-top: 2px; text-align: center; }
         
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; border-top: 1px solid #eee; padding-top: 6px; }
-        .stats-val { font-weight: bold; font-size: 1em; color: #2c3e50; }
-        .stats-label { font-size: 0.7em; color: #888; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 4px; border-top: 1px solid #eee; padding-top: 4px; }
+        .stats-val { font-weight: bold; font-size: 0.9em; color: #2c3e50; }
+        .stats-label { font-size: 0.6em; color: #888; }
 
-        .btn-row { display: flex; gap: 6px; margin-bottom: 6px; }
-        button { flex: 1; padding: 8px; border-radius: 6px; border: 2px solid #ddd; background: white; cursor: pointer; font-weight: bold; font-size: 0.85em; }
+        .btn-row { display: flex; gap: 4px; margin-bottom: 4px; }
+        button { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #ddd; background: white; cursor: pointer; font-weight: bold; font-size: 0.8em; }
         .active-view { background: #e3f2fd !important; border-color: #3498db !important; color: #1e88e5 !important; }
         
-        .btn-primary { background: #2ecc71; color: white; border: none; width: 100%; padding: 14px; font-size: 1.1em; border-radius: 10px; }
+        .btn-primary { background: #2ecc71; color: white; border: none; width: 100%; padding: 12px; font-size: 1em; border-radius: 8px; }
 
-        .rider-selector { display: flex; background: #ddd; border-radius: 8px; padding: 3px; margin-bottom: 8px; }
-        .rider-btn { flex: 1; text-align: center; padding: 8px; border-radius: 6px; font-size: 0.85em; font-weight: bold; border: none; background: none; }
+        .rider-selector { display: flex; background: #ddd; border-radius: 6px; padding: 2px; margin-bottom: 6px; }
+        .rider-btn { flex: 1; text-align: center; padding: 6px; border-radius: 4px; font-size: 0.8em; font-weight: bold; border: none; background: none; }
         .rider-active { background: white; color: #3498db; }
 
-        /* チャートの高さをさらに圧縮して3つ並べる */
-        .chart-container { height: 110px; position: relative; }
+        /* チャートの高さ調整 */
+        .chart-container { height: 105px; position: relative; }
+        .chart-container-mini { height: 55px; position: relative; } /* 経費チャートを半分に */
 
-        #map { width: 100%; height: 70vh; border-radius: 10px; z-index: 1;}
+        #map { width: 100%; height: 75vh; border-radius: 8px; }
 
-        /* 実績入力画面（モーダル） */
         #inputModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; overflow-y: auto; }
-        .modal-content { background: white; margin: 5% auto; padding: 20px; width: 90%; border-radius: 15px; box-sizing: border-box; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: #444; }
-        .input-group input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1.1em; }
-        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
+        .modal-content { background: white; margin: 5% auto; padding: 15px; width: 90%; border-radius: 12px; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -66,10 +60,9 @@
         
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 style="margin:0; font-size:0.9em; color:#666;"><span id="riderDisplayName">---</span> 目標: <span id="displayGoal">0</span>円</h2>
-                <button onclick="setGoal()" style="flex:none; padding: 4px 10px; font-size: 0.75em; width: auto; border: 1px solid #ccc;">設定</button>
+                <h2 style="margin:0; font-size:0.8em; color:#666;"><span id="riderDisplayName">---</span> 目標: <span id="displayGoal">0</span>円</h2>
+                <button onclick="setGoal()" style="padding: 2px 6px; font-size: 0.65em; width: auto;">設定</button>
             </div>
-            
             <div class="stats-grid">
                 <div><div class="stats-label">売上合計</div><div class="stats-val" id="totalSales">0円</div></div>
                 <div><div class="stats-label">純利益</div><div class="stats-val" style="color:#27ae60;" id="netProfit">0円</div></div>
@@ -82,33 +75,33 @@
         <div class="btn-row">
             <button id="btnWeek" onclick="switchView('week')">週次</button>
             <button id="btnMonth" onclick="switchView('month')" class="active-view">月次</button>
-            <button onclick="navigateTime(-1)" style="flex:0.3;">◀</button>
-            <span id="periodLabel" style="flex:1; text-align:center; align-self:center; font-weight:bold; font-size:0.8em;"></span>
-            <button onclick="navigateTime(1)" style="flex:0.3;">▶</button>
+            <button onclick="navigateTime(-1)" style="flex:0.25;">◀</button>
+            <span id="periodLabel" style="flex:1; text-align:center; align-self:center; font-weight:bold; font-size:0.7em;"></span>
+            <button onclick="navigateTime(1)" style="flex:0.25;">▶</button>
         </div>
         
         <div class="card">
-            <div class="card-title">売上の推移 (円)</div>
+            <div class="card-title">売上 (円)</div>
             <div class="chart-container"><canvas id="salesChart"></canvas></div>
         </div>
 
         <div class="card">
-            <div class="card-title">経費の推移 (円)</div>
-            <div class="chart-container"><canvas id="expenseChart"></canvas></div>
+            <div class="card-title">経費 (円)</div>
+            <div class="chart-container-mini"><canvas id="expenseChart"></canvas></div>
         </div>
 
         <div class="card">
-            <div class="card-title">時給の推移 (円/h)</div>
+            <div class="card-title">時給 (円/h)</div>
             <div class="chart-container"><canvas id="hourlyChart"></canvas></div>
         </div>
 
         <button class="btn-primary" onclick="openModal()">実績入力</button>
-        <div style="height: 20px;"></div>
+        <div style="height: 10px;"></div>
     </div>
 
     <div id="pageMap" class="content-area">
         <div id="map"></div>
-        <div class="btn-row" style="margin-top:10px;">
+        <div class="btn-row" style="margin-top:8px;">
             <button style="background:#3498db; color:white; border:none;" onclick="recordSpot('stay')">待機</button>
             <button style="background:#e74c3c; color:white; border:none;" onclick="recordSpot('hit')">鳴った！</button>
         </div>
@@ -116,24 +109,21 @@
 
     <div id="inputModal">
         <div class="modal-content">
-            <h3 id="modalTitle" style="margin-top:0;">実績入力</h3>
-            <div class="input-group">
-                <label>日付</label>
-                <input type="date" id="inputDate" onchange="loadExistingData()">
+            <h3 id="modalTitle" style="margin:0 0 12px 0; font-size:1em;">実績入力</h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div style="grid-column: span 2;"><label style="font-size:0.8em;">日付</label><input type="date" id="inputDate" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;" onchange="loadExistingData()"></div>
+                <div><label style="font-size:0.8em;">稼働(h)</label><input type="number" id="inputHours" step="0.5" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;"></div>
+                <div><label style="font-size:0.8em;">ガソリン</label><input type="number" id="inputGas" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;"></div>
+                <div><label style="font-size:0.8em;">その他経費</label><input type="number" id="inputOtherExp" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;"></div>
             </div>
-            <div class="modal-grid">
-                <div class="input-group"><label>稼働時間 (h)</label><input type="number" id="inputHours" step="0.5" placeholder="0"></div>
-                <div class="input-group"><label>ガソリン代</label><input type="number" id="inputGas" placeholder="0"></div>
+            <hr style="margin:12px 0; border:0; border-top:1px solid #eee;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div><label style="font-size:0.8em;">Uber</label><input type="number" id="inputUber" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;"></div>
+                <div><label style="font-size:0.8em;">出前館</label><input type="number" id="inputDemae" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;"></div>
+                <div><label style="font-size:0.8em;">Menu</label><input type="number" id="inputMenu" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;"></div>
+                <div><label style="font-size:0.8em;">ロケット</label><input type="number" id="inputRocket" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;"></div>
             </div>
-            <div class="input-group"><label>その他経費</label><input type="number" id="inputOtherExp" placeholder="0"></div>
-            <hr>
-            <div class="modal-grid">
-                <div class="input-group"><label>Uber</label><input type="number" id="inputUber" inputmode="numeric"></div>
-                <div class="input-group"><label>出前館</label><input type="number" id="inputDemae" inputmode="numeric"></div>
-                <div class="input-group"><label>Menu</label><input type="number" id="inputMenu" inputmode="numeric"></div>
-                <div class="input-group"><label>ロケット</label><input type="number" id="inputRocket" inputmode="numeric"></div>
-            </div>
-            <div style="display:flex; gap:10px; margin-top:20px;">
+            <div style="display:flex; gap:10px; margin-top:15px;">
                 <button onclick="closeModal()" style="background:#eee;">戻る</button>
                 <button class="btn-primary" style="margin-top:0;" onclick="saveSales()">保存</button>
             </div>
@@ -162,7 +152,7 @@
         }
 
         async function fetchCloudSales() {
-            try { const res = await fetch(DB_SALES); const cloud = await res.json(); if (cloud) { allData = cloud; localStorage.setItem('goalRider_cache', JSON.stringify(allData)); renderApp(); } } catch (e) {}
+            try { const res = await fetch(DB_SALES); const cloud = await res.json(); if (cloud) { allData = cloud; renderApp(); } } catch (e) {}
         }
 
         function renderApp() {
@@ -179,11 +169,9 @@
                     labels.push(d);
                     const s = data.sales[key] || {};
                     const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0);
-                    const de = (s.gas||0)+(s.otherExp||0); // ガソリン＋その他
+                    const de = (s.gas||0)+(s.otherExp||0);
                     const dh = s.hours || 0;
-                    chartSales.push(ds);
-                    chartExpense.push(de); // 経費
-                    chartHourly.push(dh > 0 ? Math.round(ds / dh) : 0);
+                    chartSales.push(ds); chartExpense.push(de); chartHourly.push(dh > 0 ? Math.round(ds / dh) : 0);
                     tSales += ds; tExp += de; tHours += dh;
                 }
             } else {
@@ -205,26 +193,17 @@
             document.getElementById('netProfit').innerText = (tSales - tExp).toLocaleString() + "円";
             document.getElementById('totalHours').innerText = tHours + "h";
             document.getElementById('avgHourly').innerText = tHours > 0 ? Math.round(tSales / tHours).toLocaleString() + "円" : "0円";
-            document.getElementById('displayGoal').innerText = data.goal.toLocaleString();
-            document.getElementById('displayRemaining').innerText = Math.max(0, data.goal - tSales).toLocaleString();
+            document.getElementById('displayGoal').innerText = data.goal.toLocaleString() + "円";
+            document.getElementById('displayRemaining').innerText = Math.max(0, data.goal - tSales).toLocaleString() + "円";
 
-            // チャート共通設定
-            const chartOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { beginAtZero: true, ticks: {font: {size: 9}} }, x: { ticks: {font: {size: 9}} } } };
+            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { ticks: { display: false }, grid: { display: false } }, x: { ticks: { font: { size: 8 } } } } };
 
-            // 1. 売上チャート (青・棒)
-            const ctxSales = document.getElementById('salesChart').getContext('2d');
             if (myChart) myChart.destroy();
-            myChart = new Chart(ctxSales, { type: 'bar', data: { labels, datasets: [{ data: chartSales, backgroundColor: '#3498db' }] }, options: chartOptions });
-
-            // 2. 経費チャート (ピンク・棒)
-            const ctxExp = document.getElementById('expenseChart').getContext('2d');
+            myChart = new Chart(document.getElementById('salesChart'), { type: 'bar', data: { labels, datasets: [{ data: chartSales, backgroundColor: '#3498db' }] }, options: opt });
             if (myExpenseChart) myExpenseChart.destroy();
-            myExpenseChart = new Chart(ctxExp, { type: 'bar', data: { labels, datasets: [{ data: chartExpense, backgroundColor: '#e06287' }] }, options: chartOptions });
-
-            // 3. 時給チャート (オレンジ・折れ線)
-            const ctxHourly = document.getElementById('hourlyChart').getContext('2d');
+            myExpenseChart = new Chart(document.getElementById('expenseChart'), { type: 'bar', data: { labels, datasets: [{ data: chartExpense, backgroundColor: '#e06287' }] }, options: opt });
             if (myHourlyChart) myHourlyChart.destroy();
-            myHourlyChart = new Chart(ctxHourly, { type: 'line', data: { labels, datasets: [{ data: chartHourly, borderColor: '#f39c12', fill: false, tension: 0.3 }] }, options: chartOptions });
+            myHourlyChart = new Chart(document.getElementById('hourlyChart'), { type: 'line', data: { labels, datasets: [{ data: chartHourly, borderColor: '#f39c12', fill: false, tension: 0.3 }] }, options: opt });
         }
 
         async function saveSales() {
@@ -245,7 +224,7 @@
 
         function loadExistingData() {
             const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value;
-            const d = (allData[n].sales && allData[n].sales[dk]) ? allData[n].sales[dk] : {};
+            const d = allData[n].sales[dk] || {};
             document.getElementById('inputHours').value = d.hours || "";
             document.getElementById('inputGas').value = d.gas || "";
             document.getElementById('inputOtherExp').value = d.otherExp || "";
