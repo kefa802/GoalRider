@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Biz - Layout Fix</title>
+    <title>Goal Rider Biz - Uber Cycle</title>
 
     <link rel="icon" href="https://img.icons8.com/clouds/256/delivery-man.png" type="image/png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/clouds/256/delivery-man.png">
@@ -23,11 +23,9 @@
         .content-area.active { display: block; }
 
         .card { background: white; border-radius: 8px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 8px; }
-        
-        /* 目標金額まわりのレイアウト修正：重なり防止 */
         .header-row { display: flex; justify-content: space-between; align-items: center; gap: 5px; margin-bottom: 8px; width: 100%; }
-        .header-name { font-size: 0.85em; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 35%; }
-        .header-goal { font-size: 0.8em; font-weight: bold; color: #555; white-space: nowrap; flex-grow: 1; text-align: center; }
+        .header-name { font-size: 0.85em; font-weight: bold; white-space: nowrap; max-width: 35%; }
+        .header-goal { font-size: 0.8em; font-weight: bold; color: #555; flex-grow: 1; text-align: center; }
         .set-btn { flex: none; background: #eee; border: 1px solid #ccc; padding: 4px 8px; border-radius: 4px; font-size: 0.7em; cursor: pointer; }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; border-top: 1px solid #eee; padding-top: 8px; }
@@ -45,17 +43,13 @@
 
         .chart-container { height: 100px; position: relative; margin-bottom: 4px; }
 
-        #map { width: 100%; height: 100%; border-radius: 10px; z-index: 1; background: #ddd; }
-        .search-container { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1500; display: flex; gap: 5px; }
-        .search-input { flex: 1; padding: 10px; border-radius: 8px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-size: 14px; background: white; }
-
-        /* 実績入力モーダル：コンパクトに維持 */
+        /* 実績入力モーダル：1画面に収めるためのコンパクト設定 */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; }
         .modal-content { background: white; margin: 2% auto; padding: 12px; width: 94%; border-radius: 15px; box-sizing: border-box; }
         .compact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .input-group { margin-bottom: 6px; }
         .input-group label { display: block; margin-bottom: 2px; font-weight: bold; font-size: 0.75em; color: #555; }
-        select, input, textarea { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1em; }
+        select, input, textarea { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; font-size: 0.95em; }
         hr { border: 0; border-top: 1px solid #eee; margin: 6px 0; }
     </style>
 </head>
@@ -92,9 +86,9 @@
         </div>
 
         <div class="btn-row">
-            <button onclick="changeMonth(-1)" style="flex:0.3; padding:8px;">◀</button>
-            <span id="periodLabel" style="flex:1; text-align:center; font-weight:bold; font-size:0.8em;"></span>
-            <button onclick="changeMonth(1)" style="flex:0.3; padding:8px;">▶</button>
+            <button onclick="navigatePeriod(-1)" style="flex:0.3; padding:8px;">◀</button>
+            <span id="periodLabel" style="flex:1; text-align:center; align-self:center; font-weight:bold; font-size:0.8em;"></span>
+            <button onclick="navigatePeriod(1)" style="flex:0.3; padding:8px;">▶</button>
         </div>
 
         <div class="card"><div class="stats-label" style="font-size:0.7em;">売上推移</div><div class="chart-container"><canvas id="salesChart"></canvas></div></div>
@@ -104,7 +98,7 @@
     </div>
 
     <div id="pageMap" class="content-area" style="position: relative; padding:0;">
-        <div id="map"></div>
+        <div id="map" style="width:100%; height:100%; border-radius:10px;"></div>
     </div>
 
     <div id="inputModal" class="modal">
@@ -130,11 +124,10 @@
 
     <script>
         const DB_SALES = "https://goalrider-81f01-default-rtdb.firebaseio.com/data.json";
-        const DB_MAP = "https://goalrider-81f01-default-rtdb.firebaseio.com/spots.json";
         const RIDERS = ["工藤正臣", "高瀬戒兜"];
         let currentRiderIdx = Number(localStorage.getItem('goalRider_idx')) || 0;
         let allData = JSON.parse(localStorage.getItem('goalRider_cache')) || { "工藤正臣": { goal: 500000, sales: {} }, "高瀬戒兜": { goal: 500000, sales: {} } };
-        let currentView = 'month', referenceDate = new Date(), myChart, myHourlyChart, map, currentPosMarker, allSpots = {}, mapMarkers = {};
+        let currentView = 'month', referenceDate = new Date(), myChart, myHourlyChart, map;
 
         window.onload = () => {
             document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
@@ -146,7 +139,7 @@
             document.querySelectorAll('.content-area, .tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(page === 'sales' ? 'pageSales' : 'pageMap').classList.add('active');
             document.getElementById(page === 'sales' ? 'tabSales' : 'tabMap').classList.add('active');
-            if(page === 'map') { if(!map) initMap(); else setTimeout(() => { map.invalidateSize(); }, 300); }
+            if(page === 'map' && !map) initMap();
         }
 
         async function fetchCloudSales() { try { const res = await fetch(DB_SALES); const cloud = await res.json(); if (cloud) { allData = cloud; renderApp(); } } catch (e) {} }
@@ -154,47 +147,59 @@
         function renderApp() {
             const name = RIDERS[currentRiderIdx], data = allData[name] || { goal: 500000, sales: {} };
             let labels = [], chartSales = [], chartHourly = [], chartNetHourly = [], tSales = 0, tExp = 0, tHours = 0;
-            const y = referenceDate.getFullYear(), m = referenceDate.getMonth();
-
+            
             if (currentView === 'month') {
+                const y = referenceDate.getFullYear(), m = referenceDate.getMonth();
                 const last = new Date(y, m + 1, 0).getDate();
                 document.getElementById('periodLabel').innerText = `${y}年${m + 1}月`;
                 for (let i = 1; i <= last; i++) {
                     let key = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                    labels.push(i); const s = data.sales[key] || {};
-                    const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0);
-                    const de = (s.gas||0)+(s.otherExp||0);
-                    const dh = s.hours || 0;
+                    labels.push(i);
+                    const s = data.sales[key] || {};
+                    const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
                     chartSales.push(ds); chartHourly.push(dh > 0 ? Math.round(ds/dh) : 0); chartNetHourly.push(dh > 0 ? Math.round((ds-de)/dh) : 0);
                     tSales += ds; tExp += de; tHours += dh;
                 }
             } else {
-                document.getElementById('periodLabel').innerText = "直近7日間";
-                for (let i = 6; i >= 0; i--) {
-                    let d = new Date(); d.setDate(d.getDate() - i);
+                // 月曜始まり〜日曜終わりの1週間を計算 (Uberサイクル)
+                const tempDate = new Date(referenceDate);
+                const day = tempDate.getDay(); // 0(日)〜6(土)
+                const diff = (day === 0 ? -6 : 1 - day); // 月曜日までの差分
+                const mon = new Date(tempDate.setDate(tempDate.getDate() + diff));
+                const sun = new Date(new Date(mon).setDate(mon.getDate() + 6));
+                
+                document.getElementById('periodLabel').innerText = `${mon.getMonth()+1}/${mon.getDate()} 〜 ${sun.getMonth()+1}/${sun.getDate()}`;
+                
+                for (let i = 0; i < 7; i++) {
+                    let d = new Date(mon); d.setDate(d.getDate() + i);
                     let key = d.toISOString().split('T')[0];
-                    labels.push(d.getDate() + "日");
+                    labels.push(['月','火','水','木','金','土','日'][i]);
                     const s = data.sales[key] || {};
-                    const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0);
-                    const de = (s.gas||0)+(s.otherExp||0);
-                    const dh = s.hours || 0;
+                    const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
                     chartSales.push(ds); chartHourly.push(dh > 0 ? Math.round(ds/dh) : 0); chartNetHourly.push(dh > 0 ? Math.round((ds-de)/dh) : 0);
                     tSales += ds; tExp += de; tHours += dh;
                 }
             }
+
             document.getElementById('totalSales').innerText = tSales.toLocaleString() + "円";
             document.getElementById('displayGoal').innerText = (data.goal||0).toLocaleString();
             document.getElementById('displayRemaining').innerText = Math.max(0, (data.goal||0) - tSales).toLocaleString() + "円";
             document.getElementById('avgHourly').innerText = tHours > 0 ? Math.round(tSales/tHours).toLocaleString() + "円" : "0円";
             document.getElementById('netHourly').innerText = tHours > 0 ? Math.round((tSales-tExp)/tHours).toLocaleString() + "円" : "0円";
             
-            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { beginAtZero: true, ticks: { font: { size: 8 } } }, x: { ticks: { font: { size: 7 } } } } };
+            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { beginAtZero: true, ticks: { font: { size: 8 } } }, x: { ticks: { font: { size: 10 } } } } };
             if (myChart) myChart.destroy(); myChart = new Chart(document.getElementById('salesChart'), { type: 'bar', data: { labels, datasets: [{ data: chartSales, backgroundColor: '#3498db' }] }, options: opt });
             if (myHourlyChart) myHourlyChart.destroy(); myHourlyChart = new Chart(document.getElementById('hourlyChart'), { type: 'line', data: { labels, datasets: [{ data: chartHourly, borderColor: '#f39c12', tension: 0.3 }, { data: chartNetHourly, borderColor: '#2ecc71', tension: 0.3 }]}, options: opt });
         }
 
+        function navigatePeriod(dir) {
+            if (currentView === 'month') referenceDate.setMonth(referenceDate.getMonth() + dir);
+            else referenceDate.setDate(referenceDate.getDate() + (dir * 7));
+            renderApp();
+        }
+
         function initMap() {
-            map = L.map('map', { zoomControl: false, maxZoom: 19 }).setView([35.9127, 139.4811], 18);
+            map = L.map('map', { zoomControl: false }).setView([35.9127, 139.4811], 15);
             L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 20 }).addTo(map);
         }
 
@@ -202,13 +207,8 @@
             const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value; 
             if(!allData[n].sales) allData[n].sales = {}; 
             allData[n].sales[dk] = { 
-                hours: Number(document.getElementById('inputHours').value), 
-                gas: Number(document.getElementById('inputGas').value), 
-                otherExp: Number(document.getElementById('inputOtherExp').value),
-                uber: Number(document.getElementById('inputUber').value), 
-                demae: Number(document.getElementById('inputDemae').value),
-                menu: Number(document.getElementById('inputMenu').value),
-                rocket: Number(document.getElementById('inputRocket').value)
+                hours: Number(document.getElementById('inputHours').value), gas: Number(document.getElementById('inputGas').value), otherExp: Number(document.getElementById('inputOtherExp').value),
+                uber: Number(document.getElementById('inputUber').value), demae: Number(document.getElementById('inputDemae').value), menu: Number(document.getElementById('inputMenu').value), rocket: Number(document.getElementById('inputRocket').value)
             }; 
             localStorage.setItem('goalRider_cache', JSON.stringify(allData)); renderApp(); 
             await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); 
@@ -218,18 +218,12 @@
         function loadExistingData() { 
             const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value; 
             const d = allData[n].sales[dk] || {}; 
-            document.getElementById('inputHours').value = d.hours || ""; 
-            document.getElementById('inputGas').value = d.gas || ""; 
-            document.getElementById('inputOtherExp').value = d.otherExp || "";
-            document.getElementById('inputUber').value = d.uber || ""; 
-            document.getElementById('inputDemae').value = d.demae || ""; 
-            document.getElementById('inputMenu').value = d.menu || "";
-            document.getElementById('inputRocket').value = d.rocket || "";
+            document.getElementById('inputHours').value = d.hours || ""; document.getElementById('inputGas').value = d.gas || ""; document.getElementById('inputOtherExp').value = d.otherExp || "";
+            document.getElementById('inputUber').value = d.uber || ""; document.getElementById('inputDemae').value = d.demae || ""; document.getElementById('inputMenu').value = d.menu || ""; document.getElementById('inputRocket').value = d.rocket || "";
         }
 
         function switchRider(idx) { 
-            currentRiderIdx = idx; 
-            localStorage.setItem('goalRider_idx', idx);
+            currentRiderIdx = idx; localStorage.setItem('goalRider_idx', idx);
             document.querySelectorAll('.rider-btn').forEach((b, i) => b.className = i === idx ? 'rider-btn rider-active' : 'rider-btn');
             document.getElementById('riderDisplayName').innerText = RIDERS[idx]; 
             renderApp(); 
@@ -244,15 +238,10 @@
 
         function openInputModal() { document.getElementById('inputModal').style.display='block'; loadExistingData(); }
         function closeInputModal() { document.getElementById('inputModal').style.display='none'; }
-        function changeMonth(diff) { referenceDate.setMonth(referenceDate.getMonth() + diff); renderApp(); }
         async function setGoal() { 
             const n = RIDERS[currentRiderIdx];
             const v = prompt("目標額を入力", allData[n].goal); 
-            if(v !== null) { 
-                allData[n].goal = Number(v); 
-                renderApp(); 
-                await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) });
-            } 
+            if(v !== null) { allData[n].goal = Number(v); renderApp(); await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); } 
         }
     </script>
 </body>
