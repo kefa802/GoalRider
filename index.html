@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Biz - v1.2</title>
+    <title>Goal Rider Biz - v1.3</title>
 
     <link rel="icon" href="https://img.icons8.com/clouds/256/delivery-man.png" type="image/png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/clouds/256/delivery-man.png">
@@ -175,7 +175,7 @@
         const DB_SALES = "https://goalrider-81f01-default-rtdb.firebaseio.com/data.json";
         const DB_MAP = "https://goalrider-81f01-default-rtdb.firebaseio.com/spots.json";
         const RIDERS = ["工藤正臣", "高瀬戒兜"];
-        const DEFAULT_GOAL = 300000; // デフォルト目標額を30万に設定
+        const DEFAULT_GOAL = 300000;
         
         let currentRiderIdx = Number(localStorage.getItem('goalRider_idx')) || 0;
         let allData = JSON.parse(localStorage.getItem('goalRider_cache')) || {};
@@ -239,7 +239,8 @@
         }
 
         function initMap() {
-            map = L.map('map', { zoomControl: false, maxZoom: 19 }).setView([35.9127, 139.4811], 15);
+            // デフォルトを池袋駅（35.7289, 139.7104）に設定
+            map = L.map('map', { zoomControl: false, maxZoom: 19 }).setView([35.7289, 139.7104], 15);
             baseLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
             hybridLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 20 });
             hybridLayer.addTo(map);
@@ -252,7 +253,6 @@
             else { map.removeLayer(baseLayer); hybridLayer.addTo(map); mapType = 'hybrid'; document.getElementById('layerBtn').innerText = "🗺️"; }
         }
 
-        // 検索ロジックの復旧
         async function searchAddress() {
             const q = document.getElementById('addrSearch').value; if(!q) return;
             try { 
