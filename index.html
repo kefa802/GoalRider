@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Business</title>
+    <title>Goal Rider Business Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -15,6 +15,7 @@
         .content-area { flex: 1; overflow-y: auto; padding: 15px; display: none; }
         .content-area.active { display: block; }
         .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        .card-title { font-size: 0.8em; color: #666; margin-bottom: 8px; font-weight: bold; }
         .remaining { color: #e74c3c; font-weight: bold; font-size: 1.4em; margin-top: 5px; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
         .stats-val { font-weight: bold; font-size: 1.1em; color: #2c3e50; }
@@ -60,7 +61,7 @@
             
             <div class="stats-grid">
                 <div><label style="font-size:0.7em;">売上合計</label><div class="stats-val" id="totalSales">0円</div></div>
-                <div><label style="font-size:0.7em;">純利益(経費引後)</label><div class="stats-val" style="color:#27ae60;" id="netProfit">0円</div></div>
+                <div><label style="font-size:0.7em;">純利益</label><div class="stats-val" style="color:#27ae60;" id="netProfit">0円</div></div>
                 <div><label style="font-size:0.7em;">平均時給</label><div class="stats-val" style="color:#f39c12;" id="avgHourly">0円</div></div>
                 <div><label style="font-size:0.7em;">稼働時間</label><div class="stats-val" id="totalHours">0h</div></div>
             </div>
@@ -76,8 +77,19 @@
             <span id="periodLabel" style="flex:1; text-align:center; align-self:center; font-weight:bold;"></span>
             <button onclick="navigateTime(1)" style="flex:0.3;">▶</button>
         </div>
-        <div class="card"><div style="height: 200px;"><canvas id="salesChart"></canvas></div></div>
+        
+        <div class="card">
+            <div class="card-title">売上の推移 (円)</div>
+            <div style="height: 180px;"><canvas id="salesChart"></canvas></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">時給の推移 (円/h)</div>
+            <div style="height: 180px;"><canvas id="hourlyChart"></canvas></div>
+        </div>
+
         <button class="btn-primary" onclick="openModal()">本日の実績を入力</button>
+        <div style="height: 20px;"></div>
     </div>
 
     <div id="pageMap" class="content-area">
@@ -91,7 +103,7 @@
             <h3 id="modalTitle" style="margin:0 0 15px 0;">実績入力</h3>
             <div class="input-group"><label>日付</label><input type="date" id="inputDate" onchange="loadExistingData()"></div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <div class="input-group"><label>稼働時間 (h)</label><input type="number" id="inputHours" step="0.5" placeholder="例: 8.5"></div>
+                <div class="input-group"><label>稼働時間 (h)</label><input type="number" id="inputHours" step="0.5" placeholder="0"></div>
                 <div class="input-group"><label>ガソリン代</label><input type="number" id="inputGas"></div>
             </div>
             <div class="input-group"><label>その他経費</label><input type="number" id="inputOtherExp"></div>
@@ -115,7 +127,7 @@
         const RIDERS = ["工藤正臣", "高瀬戒兜"];
         let currentRiderIdx = Number(localStorage.getItem('goalRider_idx')) || 0;
         let allData = JSON.parse(localStorage.getItem('goalRider_cache')) || { "工藤正臣": { goal: 500000, sales: {} }, "高瀬戒兜": { goal: 500000, sales: {} } };
-        let currentView = 'month', referenceDate = new Date(), myChart = null, map, currentPos = null;
+        let currentView = 'month', referenceDate = new Date(), myChart = null, myHourlyChart = null, map, currentPos = null;
 
         window.onload = () => {
             document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
@@ -141,7 +153,7 @@
         function renderApp() {
             const name = RIDERS[currentRiderIdx];
             const data = allData[name] || { goal: 500000, sales: {} };
-            let labels = [], chartValues = [], tSales = 0, tExp = 0, tHours = 0;
+            let labels = [], chartSalesValues = [], chartHourlyValues = [], tSales = 0, tExp = 0, tHours = 0;
             const y = referenceDate.getFullYear(), m = referenceDate.getMonth();
 
             if (currentView === 'month') {
@@ -152,10 +164,10 @@
                     labels.push(d);
                     const s = data.sales[key] || {};
                     const daySales = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0);
-                    chartValues.push(daySales);
-                    tSales += daySales;
-                    tExp += (s.gas||0)+(s.otherExp||0);
-                    tHours += (s.hours||0);
+                    const dayHours = s.hours || 0;
+                    chartSalesValues.push(daySales);
+                    chartHourlyValues.push(dayHours > 0 ? Math.round(daySales / dayHours) : 0);
+                    tSales += daySales; tExp += (s.gas||0)+(s.otherExp||0); tHours += dayHours;
                 }
             } else {
                 const mon = new Date(referenceDate); mon.setDate(referenceDate.getDate() - (referenceDate.getDay() || 7) + 1);
@@ -165,8 +177,10 @@
                     const key = d.toISOString().split('T')[0], s = data.sales[key] || {};
                     labels.push(['月','火','水','木','金','土','日'][i]);
                     const daySales = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0);
-                    chartValues.push(daySales);
-                    tSales += daySales; tExp += (s.gas||0)+(s.otherExp||0); tHours += (s.hours||0);
+                    const dayHours = s.hours || 0;
+                    chartSalesValues.push(daySales);
+                    chartHourlyValues.push(dayHours > 0 ? Math.round(daySales / dayHours) : 0);
+                    tSales += daySales; tExp += (s.gas||0)+(s.otherExp||0); tHours += dayHours;
                 }
             }
 
@@ -177,15 +191,26 @@
             document.getElementById('displayGoal').innerText = (data.goal || 0).toLocaleString() + "円";
             document.getElementById('displayRemaining').innerText = Math.max(0, (data.goal || 0) - tSales).toLocaleString() + "円";
 
-            const ctx = document.getElementById('salesChart').getContext('2d');
+            // 売上チャート
+            const ctxSales = document.getElementById('salesChart').getContext('2d');
             if (myChart) myChart.destroy();
-            myChart = new Chart(ctx, {
+            myChart = new Chart(ctxSales, {
                 type: 'bar',
-                data: { labels: labels, datasets: [{ label: '売上', data: chartValues, backgroundColor: '#3498db' }] },
+                data: { labels: labels, datasets: [{ label: '売上', data: chartSalesValues, backgroundColor: '#3498db' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            // 時給チャート
+            const ctxHourly = document.getElementById('hourlyChart').getContext('2d');
+            if (myHourlyChart) myHourlyChart.destroy();
+            myHourlyChart = new Chart(ctxHourly, {
+                type: 'line', // 時給は推移が見やすいように折れ線に
+                data: { labels: labels, datasets: [{ label: '時給', data: chartHourlyValues, borderColor: '#f39c12', backgroundColor: 'rgba(243, 156, 18, 0.2)', fill: true, tension: 0.3 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
 
+        // 保存・その他の関数は前回と同じ（saveSales内でrenderAppが呼ばれるのでチャートも更新されます）
         async function saveSales() {
             const n = RIDERS[currentRiderIdx], dkey = document.getElementById('inputDate').value;
             if(!allData[n].sales) allData[n].sales = {};
@@ -203,7 +228,6 @@
             renderApp();
             try { await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); } catch (e) {}
         }
-
         function loadExistingData() {
             const n = RIDERS[currentRiderIdx], dkey = document.getElementById('inputDate').value;
             const d = (allData[n].sales && allData[n].sales[dkey]) ? allData[n].sales[dkey] : {};
@@ -215,7 +239,6 @@
             document.getElementById('inputMenu').value = d.menu || "";
             document.getElementById('inputRocket').value = d.rocket || "";
         }
-
         function switchRider(idx) {
             currentRiderIdx = idx; localStorage.setItem('goalRider_idx', idx);
             document.getElementById('rider0').className = 'rider-btn' + (idx === 0 ? ' rider-active' : '');
@@ -228,7 +251,6 @@
         function setGoal() { const n = RIDERS[currentRiderIdx]; const v = prompt("目標金額", allData[n].goal); if(v){allData[n].goal=Number(v); renderApp(); fetch(DB_SALES, {method:'PUT', body:JSON.stringify(allData)});} }
         function openModal() { document.getElementById('inputModal').style.display = 'block'; loadExistingData(); }
         function closeModal() { document.getElementById('inputModal').style.display = 'none'; }
-        
         function initMap() {
             map = L.map('map').setView([35.7297, 139.7111], 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
