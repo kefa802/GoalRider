@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Pro Sync</title>
+    <title>Goal Rider Stable</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 15px; color: #333; }
@@ -11,23 +11,22 @@
         .remaining { color: #e74c3c; font-weight: bold; font-size: 1.4em; margin-top: 5px; }
         .control-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
         .btn-row { display: flex; gap: 8px; }
-        button { flex: 1; padding: 12px; border-radius: 8px; border: 2px solid #ddd; background: white; cursor: pointer; font-weight: bold; }
+        button { flex: 1; padding: 12px; border-radius: 8px; border: 2px solid #ddd; background: white; cursor: pointer; font-weight: bold; font-size: 0.9em; }
         .active-view { background: #e3f2fd !important; border-color: #3498db !important; color: #1e88e5 !important; }
         .btn-primary { background: #2ecc71; color: white; border: none; width: 100%; font-size: 1.1em; margin-top: 10px; padding: 15px; }
         .rider-selector { display: flex; background: #ddd; border-radius: 10px; padding: 4px; margin-bottom: 15px; }
-        .rider-btn { flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.9em; font-weight: bold; border: none; background: none; }
+        .rider-btn { flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; border: none; background: none; }
         .rider-active { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: #3498db; }
         #inputModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; }
         .modal-content { background: white; margin: 5% auto; padding: 20px; width: 85%; border-radius: 15px; box-sizing: border-box; }
         .input-group { margin-bottom: 12px; }
-        .input-group label { display: block; margin-bottom: 3px; font-weight: bold; font-size: 0.9em; }
-        .input-group input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1.1em; }
-        .sync-status { font-size: 0.7em; color: #999; text-align: right; margin-bottom: 5px; height: 1em; }
+        .input-group label { display: block; margin-bottom: 3px; font-weight: bold; font-size: 0.8em; }
+        .input-group input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1em; }
     </style>
 </head>
 <body>
 
-    <div class="sync-status" id="syncStatus"></div>
+    <div id="syncMsg" style="font-size:0.7em; color:#999; text-align:right; height:1.2em;"></div>
 
     <div class="rider-selector">
         <button id="rider0" class="rider-btn" onclick="switchRider(0)">工藤正臣</button>
@@ -37,13 +36,13 @@
     <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
-                <h2 style="margin:0; font-size:1.1em; color:#666;"><span id="riderDisplayName">---</span> の目標</h2>
-                <div style="font-size: 1.5em; font-weight: bold;"><span id="displayGoal">0</span>円</div>
+                <h2 style="margin:0; font-size:1em; color:#666;"><span id="riderDisplayName">---</span> の目標</h2>
+                <div style="font-size: 1.4em; font-weight: bold;"><span id="displayGoal">0</span>円</div>
             </div>
-            <button onclick="setGoal()" style="flex:none; padding: 5px 12px; font-size: 0.8em; width: auto; border: 1px solid #ccc; border-radius: 5px;">目標設定</button>
+            <button onclick="setGoal()" style="flex:none; padding: 5px 10px; font-size: 0.8em; width: auto; border: 1px solid #ccc;">設定</button>
         </div>
         <div style="margin-top:10px; border-top: 1px solid #eee; padding-top: 10px;">
-            <div style="font-size: 0.9em;">期間合計: <span id="displayCurrent">0</span>円</div>
+            <div style="font-size: 0.8em;">期間合計: <span id="displayCurrent">0</span>円</div>
             <div class="remaining">残り: <span id="displayRemaining">0</span>円</div>
         </div>
     </div>
@@ -51,11 +50,11 @@
     <div class="control-group">
         <div class="btn-row">
             <button id="btnWeek" onclick="switchView('week')">週次</button>
-            <button id="btnMonth" onclick="switchView('month')" class="active-view">月次</button>
+            <button id="btnMonth" onclick="switchView('month')">月次</button>
         </div>
         <div class="btn-row">
             <button onclick="navigateTime(-1)" style="flex:0.4;">◀ 前</button>
-            <span id="periodLabel" style="flex:1; text-align:center; align-self:center; font-weight:bold; font-size:0.9em;"></span>
+            <span id="periodLabel" style="flex:1; text-align:center; align-self:center; font-weight:bold; font-size:0.85em;"></span>
             <button onclick="navigateTime(1)" style="flex:0.4;">次 ▶</button>
         </div>
     </div>
@@ -70,14 +69,13 @@
 
     <div id="inputModal">
         <div class="modal-content">
-            <h3 id="modalTitle" style="margin-top:0;">売上入力</h3>
+            <h3 id="modalTitle" style="margin:0 0 15px 0;">売上入力</h3>
             <div class="input-group"><label>日付</label><input type="date" id="inputDate" onchange="loadExistingData()"></div>
-            <hr>
             <div class="input-group"><label>Uber</label><input type="number" id="inputUber" inputmode="numeric"></div>
             <div class="input-group"><label>出前館</label><input type="number" id="inputDemae" inputmode="numeric"></div>
             <div class="input-group"><label>Menu</label><input type="number" id="inputMenu" inputmode="numeric"></div>
             <div class="input-group"><label>ロケットナウ</label><input type="number" id="inputRocket" inputmode="numeric"></div>
-            <div style="display:flex; gap:10px; margin-top: 20px;">
+            <div style="display:flex; gap:10px; margin-top:15px;">
                 <button onclick="closeModal()" style="background:#eee;">戻る</button>
                 <button class="btn-primary" style="margin-top:0;" onclick="saveSales()">保存</button>
             </div>
@@ -87,6 +85,7 @@
     <script>
         const DB_URL = "https://goalrider-81f01-default-rtdb.firebaseio.com/data.json";
         const RIDERS = ["工藤正臣", "高瀬戒兜"];
+        
         let currentRiderIdx = Number(localStorage.getItem('goalRider_idx')) || 0;
         let allData = JSON.parse(localStorage.getItem('goalRider_cache')) || {
             "工藤正臣": { goal: 500000, sales: {} },
@@ -96,38 +95,41 @@
         let referenceDate = new Date();
         let myChart = null;
 
-        // 起動時の処理：まずローカルデータで即座に表示
+        // 1. ページロード時に即座に画面を描画（通信を待たない）
         window.onload = () => {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('inputDate').value = today;
-            switchRider(currentRiderIdx);
-            fetchCloudData(); // 裏側で同期
+            switchRider(currentRiderIdx); // ここで最初の描画
+            switchView('month');
+            
+            // その後で、裏側でこっそり通信を開始
+            setTimeout(fetchCloud, 500);
         };
 
-        async function fetchCloudData() {
+        async function fetchCloud() {
+            document.getElementById('syncMsg').innerText = "クラウド同期中...";
             try {
                 const res = await fetch(DB_URL);
+                if (!res.ok) throw new Error();
                 const cloudData = await res.json();
                 if (cloudData) {
                     allData = cloudData;
                     localStorage.setItem('goalRider_cache', JSON.stringify(allData));
                     renderApp();
-                    document.getElementById('syncStatus').innerText = "クラウドと同期完了";
+                    document.getElementById('syncMsg').innerText = "最新データに更新しました";
                 }
             } catch (e) {
-                document.getElementById('syncStatus').innerText = "オフラインモード";
+                document.getElementById('syncMsg').innerText = "オフライン表示中";
             }
         }
 
-        async function saveAndSync() {
-            localStorage.setItem('goalRider_cache', JSON.stringify(allData));
-            renderApp();
-            document.getElementById('syncStatus').innerText = "保存中...";
+        async function pushCloud() {
+            document.getElementById('syncMsg').innerText = "保存中...";
             try {
                 await fetch(DB_URL, { method: 'PUT', body: JSON.stringify(allData) });
-                document.getElementById('syncStatus').innerText = "クラウドに保存しました";
+                document.getElementById('syncMsg').innerText = "クラウドに保存完了";
             } catch (e) {
-                document.getElementById('syncStatus').innerText = "保存失敗(後ほど同期します)";
+                document.getElementById('syncMsg').innerText = "保存失敗(次回同期します)";
             }
         }
 
@@ -143,8 +145,8 @@
 
         function switchView(view) {
             currentView = view;
-            document.getElementById('btnWeek').className = (view === 'week' ? 'active-view' : '');
-            document.getElementById('btnMonth').className = (view === 'month' ? 'active-view' : '');
+            document.getElementById('btnWeek').classList.toggle('active-view', view === 'week');
+            document.getElementById('btnMonth').classList.toggle('active-view', view === 'month');
             renderApp();
         }
 
@@ -159,7 +161,7 @@
 
         function setGoal() {
             const name = RIDERS[currentRiderIdx];
-            const val = prompt(`${name} さんの目標金額を入力`, allData[name].goal);
+            const val = prompt(`${name} さんの目標金額`, allData[name].goal);
             if (val) {
                 allData[name].goal = Number(val);
                 saveAndSync();
@@ -172,7 +174,7 @@
         function loadExistingData() {
             const name = RIDERS[currentRiderIdx];
             const dateKey = document.getElementById('inputDate').value;
-            const data = allData[name].sales[dateKey] || {};
+            const data = (allData[name] && allData[name].sales) ? (allData[name].sales[dateKey] || {}) : {};
             document.getElementById('inputUber').value = data.uber || "";
             document.getElementById('inputDemae').value = data.demae || "";
             document.getElementById('inputMenu').value = data.menu || "";
@@ -182,6 +184,7 @@
         function saveSales() {
             const name = RIDERS[currentRiderIdx];
             const dateKey = document.getElementById('inputDate').value;
+            if (!allData[name].sales) allData[name].sales = {};
             allData[name].sales[dateKey] = {
                 uber: Number(document.getElementById('inputUber').value) || 0,
                 demae: Number(document.getElementById('inputDemae').value) || 0,
@@ -192,6 +195,61 @@
             saveAndSync();
         }
 
+        function saveAndSync() {
+            localStorage.setItem('goalRider_cache', JSON.stringify(allData));
+            renderApp();
+            pushCloud();
+        }
+
         function renderApp() {
             const name = RIDERS[currentRiderIdx];
-            const data
+            const data = allData[name] || { goal: 500000, sales: {} };
+            let labels = [];
+            let chartValues = [];
+            let total = 0;
+
+            if (currentView === 'month') {
+                const y = referenceDate.getFullYear();
+                const m = referenceDate.getMonth();
+                const last = new Date(y, m + 1, 0).getDate();
+                document.getElementById('periodLabel').innerText = `${y}年${m + 1}月`;
+                for (let d = 1; d <= last; d++) {
+                    const key = `${y}-${String(m + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                    labels.push(d);
+                    const val = (data.sales && data.sales[key]) ? (data.sales[key].uber + data.sales[key].demae + data.sales[key].menu + data.sales[key].rocket) : 0;
+                    chartValues.push(val);
+                    total += val;
+                }
+            } else {
+                const dayOfWeek = referenceDate.getDay() || 7;
+                const mon = new Date(referenceDate);
+                mon.setDate(referenceDate.getDate() - dayOfWeek + 1);
+                document.getElementById('periodLabel').innerText = `${mon.getMonth()+1}/${mon.getDate()}〜`;
+                for (let i = 0; i < 7; i++) {
+                    const d = new Date(mon); d.setDate(mon.getDate() + i);
+                    const key = d.toISOString().split('T')[0];
+                    labels.push(['月','火','水','木','金','土','日'][i]);
+                    const val = (data.sales && data.sales[key]) ? (data.sales[key].uber + data.sales[key].demae + data.sales[key].menu + data.sales[key].rocket) : 0;
+                    chartValues.push(val);
+                    total += val;
+                }
+            }
+
+            document.getElementById('displayGoal').innerText = (data.goal || 0).toLocaleString();
+            document.getElementById('displayCurrent').innerText = total.toLocaleString();
+            document.getElementById('displayRemaining').innerText = Math.max(0, (data.goal || 0) - total).toLocaleString();
+
+            const canvas = document.getElementById('salesChart');
+            if (canvas && typeof Chart !== 'undefined') {
+                const ctx = canvas.getContext('2d');
+                if (myChart) myChart.destroy();
+                myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels: labels, datasets: [{ label: '売上', data: chartValues, backgroundColor: '#3498db' }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
