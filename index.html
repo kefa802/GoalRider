@@ -22,11 +22,11 @@
             transition: all 0.2s;
         }
 
-        /* 選択中のボタン：背景を薄い青、枠線を濃い青にして文字をハッキリさせる */
+        /* 選択中のボタン：背景を薄い青、枠線を濃い青、文字を濃い青に */
         .active-view { 
             background: #e3f2fd !important; 
             border-color: #3498db !important; 
-            color: #3498db !important; 
+            color: #1e88e5 !important; /* 少し濃い青にして見やすく */
         }
 
         .btn-nav { flex: 0.5; background: #eee; border: 1px solid #ccc; }
@@ -46,39 +46,4 @@
         <div class="goal-info">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h2 id="viewTitle">目標: <span id="displayGoal">0</span>円</h2>
-                <button onclick="setGoal()" style="flex:none; padding: 5px 15px; font-size: 0.8em; width: auto; border: 1px solid #ccc;">設定</button>
-            </div>
-            <div>期間合計: <span id="displayCurrent">0</span>円</div>
-            <div class="remaining">残り: <span id="displayRemaining">0</span>円</div>
-        </div>
-    </div>
-
-    <div class="control-group">
-        <div class="btn-row">
-            <button id="btnWeek" onclick="switchView('week')">週次</button>
-            <button id="btnMonth" onclick="switchView('month')" class="active-view">月次</button>
-        </div>
-        <div class="btn-row">
-            <button class="btn-nav" onclick="navigateTime(-1)">◀ 前</button>
-            <span id="periodLabel" style="flex:1; text-align:center; align-self:center; font-weight:bold; font-size: 0.9em;"></span>
-            <button class="btn-nav" onclick="navigateTime(1)">次 ▶</button>
-        </div>
-    </div>
-
-    <div class="card">
-        <div style="height: 250px; position: relative;">
-            <canvas id="salesChart"></canvas>
-        </div>
-    </div>
-
-    <button class="btn-primary" onclick="openModal()">売上を入力・修正する</button>
-
-    <div id="inputModal">
-        <div class="modal-content">
-            <h3 style="margin-top:0;">売上入力</h3>
-            <div class="input-group">
-                <label>日付を選択</label>
-                <input type="date" id="inputDate" onchange="loadExistingData()">
-            </div>
-            <hr>
-            <div class="input-group"><label>Uber</label><input type="number" id="inputUber" inputmode="
+                <button onclick="setGoal()" style="flex:none; padding: 5px 10
