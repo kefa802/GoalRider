@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Biz - Strategic Pro</title>
+    <title>Goal Rider Biz</title>
 
     <link rel="icon" href="https://img.icons8.com/clouds/256/delivery-man.png" type="image/png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/clouds/256/delivery-man.png">
@@ -22,7 +22,6 @@
         .content-area { height: calc(100vh - 46px); overflow-y: auto; padding: 6px; box-sizing: border-box; display: none; }
         .content-area.active { display: block; }
 
-        /* ダッシュボードカード */
         .card { background: white; border-radius: 8px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 8px; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; border-top: 1px solid #eee; padding-top: 8px; margin-top: 4px; }
         .stats-val { font-weight: 800; font-size: 1.1em; color: #2c3e50; line-height: 1.2; }
@@ -37,10 +36,9 @@
         .rider-btn { flex: 1; text-align: center; padding: 8px; border-radius: 6px; font-size: 0.85em; font-weight: bold; border: none; background: none; }
         .rider-active { background: white; color: #3498db; }
 
-        .chart-container { height: 110px; position: relative; margin-bottom: 8px; }
-        .chart-container-mini { height: 60px; position: relative; margin-bottom: 8px; }
+        .chart-container { height: 105px; position: relative; margin-bottom: 8px; }
+        .chart-container-mini { height: 55px; position: relative; margin-bottom: 8px; }
 
-        /* MAP */
         #map { width: 100%; height: 100%; border-radius: 10px; z-index: 1; background: #ddd; }
         .search-container { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1500; display: flex; gap: 5px; }
         .search-input { flex: 1; padding: 12px; border-radius: 8px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-size: 16px; background: white; }
@@ -56,8 +54,8 @@
 <body>
 
     <div class="main-tabs">
-        <button id="tabSales" class="tab-btn active" onclick="showPage('sales')">経営ダッシュボード</button>
-        <button id="tabMap" class="tab-btn" onclick="showPage('map')">ゼンリン風MAP</button>
+        <button id="tabSales" class="tab-btn active" onclick="showPage('sales')">売上記録</button>
+        <button id="tabMap" class="tab-btn" onclick="showPage('map')">マップ</button>
     </div>
 
     <div id="pageSales" class="content-area active">
@@ -73,8 +71,9 @@
 
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 style="font-size:0.95em; margin:0;"><span id="riderDisplayName">---</span></h2>
-                <button onclick="setGoal()" style="flex:none; width:auto; padding:4px 8px;">目標設定</button>
+                <h2 style="font-size:0.9em; margin:0; flex:1;"><span id="riderDisplayName">---</span></h2>
+                <div style="font-size: 0.85em; font-weight: bold; color: #555; margin-right: 10px;">目標: <span id="displayGoal">0</span>円</div>
+                <button onclick="setGoal()" style="flex:none; width:auto; padding:4px 8px; font-size: 0.7em;">設定</button>
             </div>
             <div class="stats-grid">
                 <div><div class="stats-label">売上合計</div><div class="stats-val" id="totalSales">0円</div></div>
@@ -160,11 +159,12 @@
                     labels.push(d.getDate() + "日");
                     const s = data.sales[key] || {};
                     const ds = (s.uber||0)+(s.demae||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
-                    chartSales.push(ds); chartHourly.push(dh > 0 ? Math.round(ds/dh) : 0); chartNetHourly.push(dh > 0 ? Math.round((ds-de)/dh) : 0);
+                    chartSales.push(ds); chartExp.push(de); chartHourly.push(dh > 0 ? Math.round(ds/dh) : 0); chartNetHourly.push(dh > 0 ? Math.round((ds-de)/dh) : 0);
                     tSales += ds; tExp += de; tHours += dh;
                 }
             }
             document.getElementById('totalSales').innerText = tSales.toLocaleString() + "円";
+            document.getElementById('displayGoal').innerText = (data.goal||0).toLocaleString();
             document.getElementById('displayRemaining').innerText = Math.max(0, (data.goal||0) - tSales).toLocaleString() + "円";
             document.getElementById('avgHourly').innerText = tHours > 0 ? Math.round(tSales/tHours).toLocaleString() + "円" : "0円";
             document.getElementById('netHourly').innerText = tHours > 0 ? Math.round((tSales-tExp)/tHours).toLocaleString() + "円" : "0円";
@@ -177,7 +177,6 @@
         let baseLayer, hybridLayer;
         function initMap() {
             map = L.map('map', { zoomControl: false, maxZoom: 19 }).setView([35.9127, 139.4811], 18);
-            // 黒画面を完全に防ぐため、OSM公式タイルを使用
             baseLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
             hybridLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 20 });
             hybridLayer.addTo(map);
@@ -228,11 +227,11 @@
         function switchView(v) { currentView = v; document.getElementById('btnWeek').className = v=='week'?'active-view':''; document.getElementById('btnMonth').className = v=='month'?'active-view':''; renderApp(); }
         function openInputModal() { document.getElementById('inputModal').style.display='block'; loadExistingData(); }
         function closeInputModal() { document.getElementById('inputModal').style.display='none'; }
-        async function deleteSpot() { if(!confirm("削除？")) return; await fetch(`${DB_MAP.replace('.json', `/${editTargetId}.json`)}`, { method: 'DELETE' }); closeSpotModal(); loadAllSpots(); }
+        async function deleteSpot() { if(!confirm("記録を削除しますか？")) return; await fetch(`${DB_MAP.replace('.json', `/${editTargetId}.json`)}`, { method: 'DELETE' }); closeSpotModal(); loadAllSpots(); }
         function changeMonth(diff) { referenceDate.setMonth(referenceDate.getMonth() + diff); renderApp(); }
-        function setGoal() { const n=RIDERS[currentRiderIdx], v=prompt("目標額", allData[n].goal); if(v){allData[n].goal=Number(v); renderApp(); fetch(DB_SALES,{method:'PUT', body:JSON.stringify(allData)});} }
-        function openSpotList() { alert("一覧はマップ上の各マーカーまたはリスト機能で確認可能です"); }
-        function analyzeMap() { const nowDay = new Date().getDay(), nowHour = new Date().getHours(); Object.keys(allSpots).forEach(id => { const s = allSpots[id]; const isRel=(s.day===nowDay && Math.abs(s.hour-nowHour)<=2); mapMarkers[id].setRadius(isRel?18:8); }); alert("現在の条件に近いデータを強調しました"); }
+        function setGoal() { const n=RIDERS[currentRiderIdx], v=prompt("目標額を入力", allData[n].goal); if(v){allData[n].goal=Number(v); renderApp(); fetch(DB_SALES,{method:'PUT', body:JSON.stringify(allData)});} }
+        function openSpotList() { alert("一覧はマップ上のマーカーをタップ、または記録用リスト機能をご利用ください"); }
+        function analyzeMap() { const nowDay = new Date().getDay(), nowHour = new Date().getHours(); Object.keys(allSpots).forEach(id => { const s = allSpots[id]; const isRel=(s.day===nowDay && Math.abs(s.hour-nowHour)<=2); mapMarkers[id].setRadius(isRel?18:8); }); alert("現在に近い記録を強調しました"); }
     </script>
 </body>
 </html>
