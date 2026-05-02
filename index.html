@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Goal Rider</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -15,10 +15,10 @@
         .btn-primary { background: #2ecc71; color: white; border: none; width: 100%; font-size: 1.1em; margin-top: 10px; }
         
         #inputModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; }
-        .modal-content { background: white; margin: 5% auto; padding: 20px; width: 85%; border-radius: 15px; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: white; margin: 5% auto; padding: 20px; width: 85%; border-radius: 15px; max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
         .input-group { margin-bottom: 12px; }
         .input-group label { display: block; margin-bottom: 3px; font-weight: bold; font-size: 0.9em; color: #555; }
-        .input-group input { width: 94%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 1.1em; }
+        .input-group input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 1.1em; box-sizing: border-box; }
         .modal-btns { display: flex; gap: 10px; margin-top: 15px; }
     </style>
 </head>
@@ -27,16 +27,18 @@
     <div class="card">
         <div class="goal-info">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2><span id="currentMonthDisplay"></span> 目標: <span id="displayGoal">500,000</span>円</h2>
-                <button onclick="setGoal()" style="flex:none; padding: 5px 10px; font-size: 0.8em;">設定</button>
+                <h2 id="monthTitle">目標: <span id="displayGoal">0</span>円</h2>
+                <button onclick="setGoal()" style="flex:none; padding: 5px 10px; font-size: 0.8em; width: auto;">設定</button>
             </div>
             <div>現在: <span id="displayCurrent">0</span>円</div>
-            <div class="remaining">残り: <span id="displayRemaining">500,000</span>円</div>
+            <div class="remaining">残り: <span id="displayRemaining">0</span>円</div>
         </div>
     </div>
 
     <div class="card">
-        <canvas id="salesChart" height="200"></canvas>
+        <div style="height: 250px; position: relative;">
+            <canvas id="salesChart"></canvas>
+        </div>
     </div>
 
     <button class="btn-primary" onclick="openModal()">売上を入力・修正する</button>
@@ -46,8 +48,123 @@
             <h3 style="margin-top:0;">売上入力</h3>
             <div class="input-group">
                 <label>日付を選択</label>
-                <input type="date" id="inputDate">
+                <input type="date" id="inputDate" onchange="loadExistingData()">
             </div>
             <hr>
-            <div class="input-group"><label>Uber</label><input type="number" id="inputUber" inputmode="numeric" placeholder="0"></div>
-            <div class="input-group"><label>出前館</label><input type="number" id="inputDemae" inputmode="numeric" placeholder="0"></div>
+            <div class="input-group"><label>Uber</label><input type="number" id="inputUber" inputmode="numeric"></div>
+            <div class="input-group"><label>出前館</label><input type="number" id="inputDemae" inputmode="numeric"></div>
+            <div class="input-group"><label>Menu</label><input type="number" id="inputMenu" inputmode="numeric"></div>
+            <div class="input-group"><label>ロケットナウ</label><input type="number" id="inputRocket" inputmode="numeric"></div>
+            <div class="modal-btns">
+                <button onclick="closeModal()">戻る</button>
+                <button class="btn-primary" style="margin-top:0;" onclick="saveSales()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // データの初期化
+        let goal = Number(localStorage.getItem('goalRiderGoal')) || 500000;
+        let salesData = JSON.parse(localStorage.getItem('goalRiderSalesObj')) || {};
+        let myChart = null;
+
+        // 今日の日付をセット
+        window.onload = () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('inputDate').value = today;
+            renderApp();
+        };
+
+        function setGoal() {
+            const val = prompt("1ヶ月の目標金額を入力してください", goal);
+            if (val !== null && val !== "") {
+                goal = Number(val);
+                localStorage.setItem('goalRiderGoal', goal);
+                renderApp();
+            }
+        }
+
+        function openModal() {
+            document.getElementById('inputModal').style.display = 'block';
+            loadExistingData();
+        }
+
+        function closeModal() {
+            document.getElementById('inputModal').style.display = 'none';
+        }
+
+        // 日付を変えた時にその日のデータを読み込む
+        function loadExistingData() {
+            const dateKey = document.getElementById('inputDate').value;
+            const data = salesData[dateKey] || { uber: 0, demae: 0, menu: 0, rocket: 0 };
+            document.getElementById('inputUber').value = data.uber || "";
+            document.getElementById('inputDemae').value = data.demae || "";
+            document.getElementById('inputMenu').value = data.menu || "";
+            document.getElementById('inputRocket').value = data.rocket || "";
+        }
+
+        function saveSales() {
+            const dateKey = document.getElementById('inputDate').value;
+            if (!dateKey) return;
+
+            salesData[dateKey] = {
+                uber: Number(document.getElementById('inputUber').value) || 0,
+                demae: Number(document.getElementById('inputDemae').value) || 0,
+                menu: Number(document.getElementById('inputMenu').value) || 0,
+                rocket: Number(document.getElementById('inputRocket').value) || 0
+            };
+            
+            localStorage.setItem('goalRiderSalesObj', JSON.stringify(salesData));
+            closeModal();
+            renderApp();
+        }
+
+        function renderApp() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            document.getElementById('monthTitle').innerHTML = (month + 1) + "月 目標: <span id='displayGoal'></span>円";
+
+            const lastDay = new Date(year, month + 1, 0).getDate();
+            let monthlyTotal = 0;
+            let labels = [];
+            let chartValues = [];
+
+            for (let d = 1; d <= lastDay; d++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                labels.push(d);
+                if (salesData[dateStr]) {
+                    const dayTotal = salesData[dateStr].uber + salesData[dateStr].demae + salesData[dateStr].menu + salesData[dateStr].rocket;
+                    chartValues.push(dayTotal);
+                    monthlyTotal += dayTotal;
+                } else {
+                    chartValues.push(0);
+                }
+            }
+
+            document.getElementById('displayGoal').innerText = goal.toLocaleString();
+            document.getElementById('displayCurrent').innerText = monthlyTotal.toLocaleString();
+            document.getElementById('displayRemaining').innerText = Math.max(0, goal - monthlyTotal).toLocaleString();
+
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            if (myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '売上合計',
+                        data: chartValues,
+                        backgroundColor: '#3498db'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
