@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Biz - Uber Cycle</title>
+    <title>Goal Rider Biz - Uber Standard</title>
 
     <link rel="icon" href="https://img.icons8.com/clouds/256/delivery-man.png" type="image/png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/clouds/256/delivery-man.png">
@@ -23,10 +23,12 @@
         .content-area.active { display: block; }
 
         .card { background: white; border-radius: 8px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 8px; }
+        
+        /* ヘッダー：重なり防止レイアウト */
         .header-row { display: flex; justify-content: space-between; align-items: center; gap: 5px; margin-bottom: 8px; width: 100%; }
         .header-name { font-size: 0.85em; font-weight: bold; white-space: nowrap; max-width: 35%; }
         .header-goal { font-size: 0.8em; font-weight: bold; color: #555; flex-grow: 1; text-align: center; }
-        .set-btn { flex: none; background: #eee; border: 1px solid #ccc; padding: 4px 8px; border-radius: 4px; font-size: 0.7em; cursor: pointer; }
+        .set-btn { flex: none; background: #eee; border: 1px solid #ccc; padding: 4px 8px; border-radius: 4px; font-size: 0.7em; }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; border-top: 1px solid #eee; padding-top: 8px; }
         .stats-val { font-weight: 800; font-size: 1.05em; color: #2c3e50; line-height: 1.2; }
@@ -43,14 +45,16 @@
 
         .chart-container { height: 100px; position: relative; margin-bottom: 4px; }
 
-        /* 実績入力モーダル：1画面に収めるためのコンパクト設定 */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; }
+        /* 実績入力モーダル：1画面に収めるコンパクトグリッド */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; overflow-y: auto; }
         .modal-content { background: white; margin: 2% auto; padding: 12px; width: 94%; border-radius: 15px; box-sizing: border-box; }
         .compact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .input-group { margin-bottom: 6px; }
         .input-group label { display: block; margin-bottom: 2px; font-weight: bold; font-size: 0.75em; color: #555; }
-        select, input, textarea { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; font-size: 0.95em; }
+        select, input { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; font-size: 0.95em; }
         hr { border: 0; border-top: 1px solid #eee; margin: 6px 0; }
+        
+        #map { width: 100%; height: 100%; border-radius: 10px; z-index: 1; background: #000; }
     </style>
 </head>
 <body>
@@ -98,27 +102,31 @@
     </div>
 
     <div id="pageMap" class="content-area" style="position: relative; padding:0;">
-        <div id="map" style="width:100%; height:100%; border-radius:10px;"></div>
+        <div id="map"></div>
     </div>
 
     <div id="inputModal" class="modal">
         <div class="modal-content">
             <h3 style="margin: 0 0 8px 0; border-bottom: 1px solid #eee; padding-bottom: 4px; font-size: 1.1em;">実績入力</h3>
             <div class="input-group"><label>日付</label><input type="date" id="inputDate" onchange="loadExistingData()"></div>
+            
             <div class="compact-grid">
-                <div class="input-group"><label>稼働時間(h)</label><input type="number" id="inputHours" step="0.5"></div>
-                <div class="input-group"><label>ガソリン(円)</label><input type="number" id="inputGas"></div>
+                <div class="input-group"><label>稼働時間(h)</label><input type="number" id="inputHours" step="0.5" placeholder="0"></div>
+                <div class="input-group"><label>ガソリン(円)</label><input type="number" id="inputGas" placeholder="0"></div>
             </div>
-            <div class="input-group" style="margin-bottom:0;"><label>その他経費(円)</label><input type="number" id="inputOtherExp"></div>
+            <div class="input-group"><label>その他経費(円)</label><input type="number" id="inputOtherExp" placeholder="0"></div>
+            
             <hr>
+            
             <div class="compact-grid">
-                <div class="input-group"><label>Uber</label><input type="number" id="inputUber"></div>
-                <div class="input-group"><label>出前館</label><input type="number" id="inputDemae"></div>
-                <div class="input-group"><label>Menu</label><input type="number" id="inputMenu"></div>
-                <div class="input-group"><label>ロケットナウ</label><input type="number" id="inputRocket"></div>
+                <div class="input-group"><label>Uber</label><input type="number" id="inputUber" placeholder="0"></div>
+                <div class="input-group"><label>出前館</label><input type="number" id="inputDemae" placeholder="0"></div>
+                <div class="input-group"><label>Menu</label><input type="number" id="inputMenu" placeholder="0"></div>
+                <div class="input-group"><label>ロケット</label><input type="number" id="inputRocket" placeholder="0"></div>
             </div>
+            
             <button class="btn-primary" onclick="saveSales()" style="margin-top:8px;">保存して閉じる</button>
-            <button onclick="closeInputModal()" style="width:100%; border:none; background:none; color:#777; padding:8px; font-size:0.8em;">閉じる</button>
+            <button onclick="closeInputModal()" style="width:100%; border:none; background:none; color:#777; padding:8px; font-size:0.8em; margin-top:2px;">閉じる</button>
         </div>
     </div>
 
@@ -147,29 +155,28 @@
         function renderApp() {
             const name = RIDERS[currentRiderIdx], data = allData[name] || { goal: 500000, sales: {} };
             let labels = [], chartSales = [], chartHourly = [], chartNetHourly = [], tSales = 0, tExp = 0, tHours = 0;
-            
+            const y = referenceDate.getFullYear(), m = referenceDate.getMonth();
+
             if (currentView === 'month') {
-                const y = referenceDate.getFullYear(), m = referenceDate.getMonth();
                 const last = new Date(y, m + 1, 0).getDate();
                 document.getElementById('periodLabel').innerText = `${y}年${m + 1}月`;
                 for (let i = 1; i <= last; i++) {
                     let key = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                    labels.push(i);
-                    const s = data.sales[key] || {};
-                    const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
+                    labels.push(i); const s = data.sales[key] || {};
+                    const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0);
+                    const de = (s.gas||0)+(s.otherExp||0);
+                    const dh = s.hours || 0;
                     chartSales.push(ds); chartHourly.push(dh > 0 ? Math.round(ds/dh) : 0); chartNetHourly.push(dh > 0 ? Math.round((ds-de)/dh) : 0);
                     tSales += ds; tExp += de; tHours += dh;
                 }
             } else {
-                // 月曜始まり〜日曜終わりの1週間を計算 (Uberサイクル)
+                // Uberサイクル：月曜始まり〜日曜終わり
                 const tempDate = new Date(referenceDate);
-                const day = tempDate.getDay(); // 0(日)〜6(土)
-                const diff = (day === 0 ? -6 : 1 - day); // 月曜日までの差分
+                const day = tempDate.getDay();
+                const diff = (day === 0 ? -6 : 1 - day); 
                 const mon = new Date(tempDate.setDate(tempDate.getDate() + diff));
                 const sun = new Date(new Date(mon).setDate(mon.getDate() + 6));
-                
-                document.getElementById('periodLabel').innerText = `${mon.getMonth()+1}/${mon.getDate()} 〜 ${sun.getMonth()+1}/${sun.getDate()}`;
-                
+                document.getElementById('periodLabel').innerText = `${mon.getMonth()+1}/${mon.getDate()}〜${sun.getMonth()+1}/${sun.getDate()}`;
                 for (let i = 0; i < 7; i++) {
                     let d = new Date(mon); d.setDate(d.getDate() + i);
                     let key = d.toISOString().split('T')[0];
@@ -187,7 +194,7 @@
             document.getElementById('avgHourly').innerText = tHours > 0 ? Math.round(tSales/tHours).toLocaleString() + "円" : "0円";
             document.getElementById('netHourly').innerText = tHours > 0 ? Math.round((tSales-tExp)/tHours).toLocaleString() + "円" : "0円";
             
-            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { beginAtZero: true, ticks: { font: { size: 8 } } }, x: { ticks: { font: { size: 10 } } } } };
+            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { beginAtZero: true, ticks: { font: { size: 8 } } }, x: { ticks: { font: { size: 9 } } } } };
             if (myChart) myChart.destroy(); myChart = new Chart(document.getElementById('salesChart'), { type: 'bar', data: { labels, datasets: [{ data: chartSales, backgroundColor: '#3498db' }] }, options: opt });
             if (myHourlyChart) myHourlyChart.destroy(); myHourlyChart = new Chart(document.getElementById('hourlyChart'), { type: 'line', data: { labels, datasets: [{ data: chartHourly, borderColor: '#f39c12', tension: 0.3 }, { data: chartNetHourly, borderColor: '#2ecc71', tension: 0.3 }]}, options: opt });
         }
@@ -199,8 +206,9 @@
         }
 
         function initMap() {
-            map = L.map('map', { zoomControl: false }).setView([35.9127, 139.4811], 15);
-            L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 20 }).addTo(map);
+            map = L.map('map', { zoomControl: false, maxZoom: 19 }).setView([35.9127, 139.4811], 15);
+            // 安定した高精細Googleハイブリッド地図
+            L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 19 }).addTo(map);
         }
 
         async function saveSales() { 
@@ -238,6 +246,7 @@
 
         function openInputModal() { document.getElementById('inputModal').style.display='block'; loadExistingData(); }
         function closeInputModal() { document.getElementById('inputModal').style.display='none'; }
+        function changeMonth(diff) { navigatePeriod(diff); }
         async function setGoal() { 
             const n = RIDERS[currentRiderIdx];
             const v = prompt("目標額を入力", allData[n].goal); 
