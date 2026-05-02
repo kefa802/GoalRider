@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Business Strategic</title>
+    <title>Goal Rider Strategic MAP Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -20,7 +20,6 @@
         /* ダッシュボード共通カード */
         .card { background: white; border-radius: 8px; padding: 6px 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 4px; }
         .card-title { font-size: 0.65em; color: #555; margin-bottom: 2px; font-weight: bold; text-align: center; }
-        
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; margin-top: 4px; border-top: 1px solid #eee; padding-top: 6px; }
         .stats-val { font-weight: 800; font-size: 1.1em; color: #2c3e50; line-height: 1.2; }
         .stats-label { font-size: 0.7em; color: #777; margin-bottom: 1px; }
@@ -34,7 +33,6 @@
         .rider-btn { flex: 1; text-align: center; padding: 6px; border-radius: 6px; font-size: 0.85em; font-weight: bold; border: none; background: none; }
         .rider-active { background: white; color: #3498db; }
 
-        /* チャートサイズ調整 */
         .chart-container { height: 100px; position: relative; }
         .chart-container-mini { height: 55px; position: relative; }
 
@@ -43,6 +41,17 @@
         .map-ui { position: absolute; bottom: 65px; right: 15px; display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
         .ui-btn { width: 50px; height: 50px; border-radius: 25px; border: none; color: white; font-weight: bold; box-shadow: 0 4px 8px rgba(0,0,0,0.3); font-size: 0.8em; cursor: pointer; }
         
+        /* 吹き出し（ラベル）のカスタマイズ */
+        .leaflet-tooltip-own {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 2px 5px;
+            font-size: 11px;
+            font-weight: bold;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
         /* モーダル共通 */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; overflow-y: auto; }
         .modal-content { background: white; margin: 5% auto; padding: 20px; width: 90%; border-radius: 15px; box-sizing: border-box; }
@@ -348,9 +357,21 @@
             Object.keys(allSpots).forEach(id => {
                 const s = allSpots[id];
                 let color = (s.subCat === "最高" || s.subCat === "鳴るエリア") ? "#2ecc71" : (s.subCat === "最低" || s.subCat === "鳴らないエリア") ? "#e74c3c" : "#f1c40f";
+                
                 const m = L.circleMarker([s.lat, s.lng], { radius: 10, fillColor: color, color: "#fff", weight: 2, fillOpacity: 0.8 }).addTo(map);
+                
+                // コメントを吹き出し（Tooltip）として表示設定
+                // permanent: true で常に表示、direction: 'right' で右側に表示
+                if (s.comment) {
+                    m.bindTooltip(s.comment, { 
+                        permanent: true, 
+                        direction: 'right', 
+                        className: 'leaflet-tooltip-own',
+                        offset: [10, 0]
+                    }).openTooltip();
+                }
+
                 m.on('click', () => openSpotModal(s.lat, s.lng, id));
-                m.bindTooltip(`${s.mainCat}:${s.subCat}`, { direction: 'top' });
                 mapMarkers[id] = m;
             });
         }
