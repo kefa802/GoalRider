@@ -3,45 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Biz Perfect Fit</title>
+    <title>Goal Rider Biz Final Plus</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        /* 画面全体の高さを固定し、はみ出しを禁止 */
         body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 0; color: #333; height: 100vh; overflow: hidden; }
         .main-tabs { display: flex; background: #2c3e50; padding: 2px; gap: 2px; }
         .tab-btn { flex: 1; padding: 8px; border: none; background: none; color: #bdc3c7; font-weight: bold; font-size: 0.8em; border-radius: 4px; }
         .tab-btn.active { background: #34495e; color: white; }
         
-        /* コンテンツエリアの余白をさらにタイトに */
         .content-area { height: calc(100vh - 36px); overflow: hidden; padding: 4px 6px; box-sizing: border-box; }
         .content-area { display: none; }
         .content-area.active { display: block; }
 
-        /* カードの余白を極限まで削減 */
         .card { background: white; border-radius: 8px; padding: 6px 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 4px; }
         .card-title { font-size: 0.65em; color: #555; margin-bottom: 2px; font-weight: bold; text-align: center; }
-        .remaining { color: #e74c3c; font-weight: bold; font-size: 1em; margin-top: 2px; text-align: center; }
         
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 4px; border-top: 1px solid #eee; padding-top: 4px; }
-        .stats-val { font-weight: bold; font-size: 0.95em; color: #2c3e50; }
-        .stats-label { font-size: 0.65em; color: #888; }
+        /* 統計エリアを3行2列に変更して見やすく */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; margin-top: 4px; border-top: 1px solid #eee; padding-top: 4px; }
+        .stats-val { font-weight: bold; font-size: 0.85em; color: #2c3e50; }
+        .stats-label { font-size: 0.6em; color: #888; }
 
         .btn-row { display: flex; gap: 4px; margin-bottom: 4px; }
         button { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #ddd; background: white; cursor: pointer; font-weight: bold; font-size: 0.8em; }
         .active-view { background: #e3f2fd !important; border-color: #3498db !important; color: #1e88e5 !important; }
         
-        /* ボタンのパディングを少し削って高さを抑える */
         .btn-primary { background: #2ecc71; color: white; border: none; width: 100%; padding: 12px; font-size: 1.1em; border-radius: 10px; }
 
         .rider-selector { display: flex; background: #ddd; border-radius: 8px; padding: 2px; margin-bottom: 4px; }
         .rider-btn { flex: 1; text-align: center; padding: 6px; border-radius: 6px; font-size: 0.85em; font-weight: bold; border: none; background: none; }
         .rider-active { background: white; color: #3498db; }
 
-        /* チャートの比率を再調整 */
-        .chart-container { height: 110px; position: relative; }
-        .chart-container-mini { height: 70px; position: relative; }
+        .chart-container { height: 100px; position: relative; }
+        .chart-container-mini { height: 60px; position: relative; }
 
         #map { width: 100%; height: 75vh; border-radius: 10px; }
 
@@ -68,51 +63,37 @@
         
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 style="margin:0; font-size:0.9em; color:#666;"><span id="riderDisplayName">---</span> 目標: <span id="displayGoal">0</span>円</h2>
-                <button onclick="setGoal()" style="padding: 2px 8px; font-size: 0.75em; width: auto; border: 1px solid #ccc; border-radius: 4px;">設定</button>
+                <h2 style="margin:0; font-size:0.85em; color:#666;"><span id="riderDisplayName">---</span> 目標: <span id="displayGoal">0</span>円</h2>
+                <button onclick="setGoal()" style="padding: 2px 8px; font-size: 0.7em; width: auto; border: 1px solid #ccc;">設定</button>
             </div>
-            
             <div class="stats-grid">
                 <div><div class="stats-label">売上合計</div><div class="stats-val" id="totalSales">0円</div></div>
                 <div><div class="stats-label">純利益</div><div class="stats-val" style="color:#27ae60;" id="netProfit">0円</div></div>
-                <div><div class="stats-label">平均時給</div><div class="stats-val" style="color:#f39c12;" id="avgHourly">0円</div></div>
+                <div><div class="stats-label">売上時給</div><div class="stats-val" style="color:#f39c12;" id="avgHourly">0円</div></div>
+                <div><div class="stats-label">実質時給</div><div class="stats-val" style="color:#2ecc71;" id="netHourly">0円</div></div>
                 <div><div class="stats-label">稼働時間</div><div class="stats-val" id="totalHours">0h</div></div>
+                <div><div class="stats-label" style="color:#e74c3c;">目標まで</div><div class="stats-val" id="displayRemaining" style="color:#e74c3c;">0円</div></div>
             </div>
-            <div class="remaining">目標まで: <span id="displayRemaining">0</span>円</div>
         </div>
 
         <div class="btn-row">
             <button id="btnWeek" onclick="switchView('week')">週次</button>
             <button id="btnMonth" onclick="switchView('month')" class="active-view">月次</button>
-            <button onclick="navigateTime(-1)" style="flex:0.3;">◀</button>
-            <span id="periodLabel" style="flex:1; text-align:center; align-self:center; font-weight:bold; font-size:0.8em;"></span>
-            <button onclick="navigateTime(1)" style="flex:0.3;">▶</button>
+            <button onclick="navigateTime(-1)" style="flex:0.25;">◀</button>
+            <span id="periodLabel" style="flex:1; text-align:center; align-self:center; font-weight:bold; font-size:0.75em;"></span>
+            <button onclick="navigateTime(1)" style="flex:0.25;">▶</button>
         </div>
         
-        <div class="card">
-            <div class="card-title">売上の推移 (円)</div>
-            <div class="chart-container"><canvas id="salesChart"></canvas></div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">経費の推移 (円)</div>
-            <div class="chart-container-mini"><canvas id="expenseChart"></canvas></div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">時給の推移 (円/h)</div>
-            <div class="chart-container"><canvas id="hourlyChart"></canvas></div>
-        </div>
+        <div class="card"><div class="card-title">売上 (青)</div><div class="chart-container"><canvas id="salesChart"></canvas></div></div>
+        <div class="card"><div class="card-title">経費 (桃)</div><div class="chart-container-mini"><canvas id="expenseChart"></canvas></div></div>
+        <div class="card"><div class="card-title">時給推移 (橙:売上 / 緑:実質)</div><div class="chart-container"><canvas id="hourlyChart"></canvas></div></div>
 
         <button class="btn-primary" onclick="openModal()">実績入力</button>
     </div>
 
     <div id="pageMap" class="content-area">
         <div id="map"></div>
-        <div class="btn-row" style="margin-top:10px;">
-            <button style="background:#3498db; color:white; border:none;" onclick="recordSpot('stay')">待機</button>
-            <button style="background:#e74c3c; color:white; border:none;" onclick="recordSpot('hit')">鳴った！</button>
-        </div>
+        <div class="btn-row" style="margin-top:10px;"><button style="background:#3498db; color:white; border:none;" onclick="recordSpot('stay')">待機</button><button style="background:#e74c3c; color:white; border:none;" onclick="recordSpot('hit')">鳴った！</button></div>
     </div>
 
     <div id="inputModal">
@@ -131,10 +112,7 @@
                 <div class="input-group"><label>Menu</label><input type="number" id="inputMenu" inputmode="numeric"></div>
                 <div class="input-group"><label>ロケット</label><input type="number" id="inputRocket" inputmode="numeric"></div>
             </div>
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button onclick="closeModal()" style="background:#eee;">戻る</button>
-                <button class="btn-primary" style="margin-top:0;" onclick="saveSales()">保存</button>
-            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;"><button onclick="closeModal()" style="background:#eee;">戻る</button><button class="btn-primary" style="margin-top:0;" onclick="saveSales()">保存</button></div>
         </div>
     </div>
 
@@ -166,50 +144,56 @@
         function renderApp() {
             const name = RIDERS[currentRiderIdx];
             const data = allData[name];
-            let labels = [], chartSales = [], chartExpense = [], chartHourly = [], tSales = 0, tExp = 0, tHours = 0;
+            let labels = [], chartSales = [], chartExpense = [], chartHourly = [], chartNetHourly = [], tSales = 0, tExp = 0, tHours = 0;
             const y = referenceDate.getFullYear(), m = referenceDate.getMonth();
 
-            if (currentView === 'month') {
-                const last = new Date(y, m + 1, 0).getDate();
-                document.getElementById('periodLabel').innerText = `${y}年${m + 1}月`;
-                for (let d = 1; d <= last; d++) {
-                    const key = `${y}-${String(m + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                    labels.push(d);
-                    const s = data.sales[key] || {};
-                    const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0);
-                    const de = (s.gas||0)+(s.otherExp||0);
-                    chartSales.push(ds); chartExpense.push(de); chartHourly.push(s.hours > 0 ? Math.round(ds / s.hours) : 0);
-                    tSales += ds; tExp += de; tHours += (s.hours||0);
-                }
-            } else {
+            const last = currentView === 'month' ? new Date(y, m + 1, 0).getDate() : 7;
+            if (currentView === 'month') document.getElementById('periodLabel').innerText = `${y}年${m + 1}月`;
+            else {
                 const mon = new Date(referenceDate); mon.setDate(referenceDate.getDate() - (referenceDate.getDay() || 7) + 1);
                 document.getElementById('periodLabel').innerText = `${mon.getMonth()+1}/${mon.getDate()}〜`;
-                for (let i = 0; i < 7; i++) {
-                    const d = new Date(mon); d.setDate(mon.getDate() + i);
-                    const key = d.toISOString().split('T')[0], s = data.sales[key] || {};
-                    labels.push(['月','火','水','木','金','土','日'][i]);
-                    const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0);
-                    const de = (s.gas||0)+(s.otherExp||0);
-                    chartSales.push(ds); chartExpense.push(de); chartHourly.push(s.hours > 0 ? Math.round(ds / s.hours) : 0);
-                    tSales += ds; tExp += de; tHours += (s.hours||0);
+            }
+
+            for (let i = 1; i <= last; i++) {
+                let key, label;
+                if (currentView === 'month') {
+                    key = `${y}-${String(m + 1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                    label = i;
+                } else {
+                    const mon = new Date(referenceDate); mon.setDate(referenceDate.getDate() - (referenceDate.getDay() || 7) + 1);
+                    const d = new Date(mon); d.setDate(mon.getDate() + i - 1);
+                    key = d.toISOString().split('T')[0];
+                    label = ['月','火','水','木','金','土','日'][i-1];
                 }
+                labels.push(label);
+                const s = data.sales[key] || {};
+                const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0);
+                const de = (s.gas||0)+(s.otherExp||0);
+                const dh = s.hours || 0;
+                chartSales.push(ds); chartExpense.push(de);
+                chartHourly.push(dh > 0 ? Math.round(ds / dh) : 0);
+                chartNetHourly.push(dh > 0 ? Math.round((ds - de) / dh) : 0);
+                tSales += ds; tExp += de; tHours += dh;
             }
 
             document.getElementById('totalSales').innerText = tSales.toLocaleString() + "円";
             document.getElementById('netProfit').innerText = (tSales - tExp).toLocaleString() + "円";
             document.getElementById('totalHours').innerText = tHours + "h";
             document.getElementById('avgHourly').innerText = tHours > 0 ? Math.round(tSales / tHours).toLocaleString() + "円" : "0円";
-            document.getElementById('displayGoal').innerText = data.goal.toLocaleString() + "円";
+            document.getElementById('netHourly').innerText = tHours > 0 ? Math.round((tSales - tExp) / tHours).toLocaleString() + "円" : "0円";
+            document.getElementById('displayGoal').innerText = data.goal.toLocaleString();
             document.getElementById('displayRemaining').innerText = Math.max(0, data.goal - tSales).toLocaleString() + "円";
 
             const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 8 } } } } };
-
             if (myChart) myChart.destroy();
             myChart = new Chart(document.getElementById('salesChart'), { type: 'bar', data: { labels, datasets: [{ data: chartSales, backgroundColor: '#3498db' }] }, options: opt });
             if (myExpenseChart) myExpenseChart.destroy();
             myExpenseChart = new Chart(document.getElementById('expenseChart'), { type: 'bar', data: { labels, datasets: [{ data: chartExpense, backgroundColor: '#e06287' }] }, options: opt });
             if (myHourlyChart) myHourlyChart.destroy();
-            myHourlyChart = new Chart(document.getElementById('hourlyChart'), { type: 'line', data: { labels, datasets: [{ data: chartHourly, borderColor: '#f39c12', fill: false, tension: 0.3 }] }, options: opt });
+            myHourlyChart = new Chart(document.getElementById('hourlyChart'), { type: 'line', data: { labels, datasets: [
+                { data: chartHourly, borderColor: '#f39c12', fill: false, tension: 0.3 },
+                { data: chartNetHourly, borderColor: '#2ecc71', fill: false, tension: 0.3 }
+            ]}, options: opt });
         }
 
         async function saveSales() {
@@ -227,7 +211,6 @@
             closeModal(); localStorage.setItem('goalRider_cache', JSON.stringify(allData)); renderApp();
             await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) });
         }
-
         function loadExistingData() {
             const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value;
             const d = (allData[n].sales && allData[n].sales[dk]) ? allData[n].sales[dk] : {};
@@ -239,7 +222,6 @@
             document.getElementById('inputMenu').value = d.menu || "";
             document.getElementById('inputRocket').value = d.rocket || "";
         }
-
         function switchRider(idx) { currentRiderIdx = idx; localStorage.setItem('goalRider_idx', idx); renderApp(); document.getElementById('rider0').className = 'rider-btn'+(idx==0?' rider-active':''); document.getElementById('rider1').className = 'rider-btn'+(idx==1?' rider-active':''); document.getElementById('riderDisplayName').innerText = RIDERS[idx]; }
         function switchView(v) { currentView = v; document.getElementById('btnWeek').className = v=='week'?'active-view':''; document.getElementById('btnMonth').className = v=='month'?'active-view':''; renderApp(); }
         function navigateTime(dir) { currentView === 'month' ? referenceDate.setMonth(referenceDate.getMonth()+dir) : referenceDate.setDate(referenceDate.getDate()+(dir*7)); renderApp(); }
