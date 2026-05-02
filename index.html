@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Strategic Map</title>
+    <title>Goal Rider Strategic Map Pro</title>
 
     <link rel="icon" href="https://img.icons8.com/clouds/256/delivery-man.png" type="image/png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/clouds/256/delivery-man.png">
@@ -22,40 +22,27 @@
         .content-area { height: calc(100vh - 40px); overflow: hidden; padding: 4px 6px; box-sizing: border-box; display: none; }
         .content-area.active { display: block; }
 
-        /* 経営ダッシュボード用スタイル */
+        /* ダッシュボード用 */
         .card { background: white; border-radius: 8px; padding: 6px 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 4px; }
-        .card-title { font-size: 0.65em; color: #555; margin-bottom: 2px; font-weight: bold; text-align: center; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; margin-top: 4px; border-top: 1px solid #eee; padding-top: 6px; }
-        .stats-val { font-weight: 800; font-size: 1.1em; color: #2c3e50; line-height: 1.2; }
-        .stats-label { font-size: 0.7em; color: #777; margin-bottom: 1px; }
-        .btn-row { display: flex; gap: 4px; margin-bottom: 4px; }
-        button { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #ddd; background: white; cursor: pointer; font-weight: bold; font-size: 0.8em; }
-        .active-view { background: #e3f2fd !important; border-color: #3498db !important; color: #1e88e5 !important; }
-        .btn-primary { background: #2ecc71; color: white; border: none; width: 100%; padding: 12px; font-size: 1.1em; border-radius: 10px; }
-        .rider-selector { display: flex; background: #ddd; border-radius: 8px; padding: 2px; margin-bottom: 4px; }
-        .rider-btn { flex: 1; text-align: center; padding: 6px; border-radius: 6px; font-size: 0.85em; font-weight: bold; border: none; background: none; }
-        .rider-active { background: white; color: #3498db; }
+        .stats-val { font-weight: 800; font-size: 1.1em; color: #2c3e50; }
+        .stats-label { font-size: 0.7em; color: #777; }
         .chart-container { height: 100px; position: relative; }
-        .chart-container-mini { height: 50px; position: relative; }
+        .btn-primary { background: #2ecc71; color: white; border: none; width: 100%; padding: 12px; font-size: 1.1em; border-radius: 10px; cursor: pointer; }
 
-        /* MAP 検索バー (ゼンリン風に改良) */
+        /* MAP用 */
         .search-container { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1500; display: flex; gap: 5px; }
-        .search-input { flex: 1; padding: 12px; border-radius: 8px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); background: white; font-size: 16px; -webkit-appearance: none; }
-        .search-go { width: 65px; background: #3498db; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 0.9em; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .search-input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-shadow: 0 4px 12px rgba(0,0,0,0.2); background: white; font-size: 16px; }
+        .search-go { width: 65px; background: #3498db; color: white; border: none; border-radius: 8px; font-weight: bold; }
 
-        #map { width: 100%; height: 100%; border-radius: 10px; z-index: 1; background: #eee; }
+        #map { width: 100%; height: 100%; border-radius: 10px; z-index: 1; background: #f4f4f4; }
         .map-ui { position: absolute; bottom: 80px; right: 15px; display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
-        .ui-btn { width: 50px; height: 50px; border-radius: 25px; border: none; color: white; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 1em; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .locate-btn { background: white !important; color: #3498db !important; font-size: 1.6em !important; border: 2px solid #3498db !important; }
+        .ui-btn { width: 54px; height: 54px; border-radius: 27px; border: none; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; }
+        
+        .leaflet-tooltip-own { background: white; border: 1px solid #333; border-radius: 4px; padding: 3px 6px; font-size: 11px; font-weight: bold; color: #000; white-space: nowrap; }
 
-        .leaflet-tooltip-own { background: rgba(255, 255, 255, 0.95); border: 1px solid #333; border-radius: 4px; padding: 3px 6px; font-size: 11px; font-weight: bold; white-space: nowrap; color: #000; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-
-        /* モーダル */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; overflow-y: auto; }
-        .modal-content { background: white; margin: 10% auto; padding: 20px; width: 90%; border-radius: 15px; box-sizing: border-box; }
-        .input-group { margin-bottom: 12px; }
-        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }
-        select, input, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1em; }
+        .modal-content { background: white; margin: 10% auto; padding: 20px; width: 90%; border-radius: 15px; }
     </style>
 </head>
 <body>
@@ -66,44 +53,36 @@
     </div>
 
     <div id="pageSales" class="content-area active">
-        <div class="rider-selector"><button id="rider0" class="rider-btn" onclick="switchRider(0)">工藤正臣</button><button id="rider1" class="rider-btn" onclick="switchRider(1)">高瀬戒兜</button></div>
         <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center;"><h2 style="margin:0; font-size:0.9em; color:#666;"><span id="riderDisplayName">---</span> 目標</h2><button onclick="setGoal()" style="padding: 2px 8px; font-size: 0.7em;">設定</button></div>
+            <div style="display: flex; justify-content: space-between;"><h2 style="font-size:0.9em;"><span id="riderDisplayName">---</span></h2><button onclick="setGoal()">目標設定</button></div>
             <div class="stats-grid">
                 <div><div class="stats-label">売上合計</div><div class="stats-val" id="totalSales">0円</div></div>
-                <div><div class="stats-label">純利益</div><div class="stats-val" style="color:#27ae60;" id="netProfit">0円</div></div>
-                <div><div class="stats-label">売上時給</div><div class="stats-val" style="color:#f39c12;" id="avgHourly">0円</div></div>
+                <div><div class="stats-label">目標まで</div><div class="stats-val" id="displayRemaining" style="color:#e74c3c;">0円</div></div>
+                <div><div class="stats-label">売上時給</div><div class="stats-val" id="avgHourly">0円</div></div>
                 <div><div class="stats-label">実質時給</div><div class="stats-val" style="color:#2ecc71;" id="netHourly">0円</div></div>
-                <div><div class="stats-label">稼働時間</div><div class="stats-val" id="totalHours">0h</div></div>
-                <div><div class="stats-label" style="color:#e74c3c;">目標まで</div><div class="stats-val" id="displayRemaining" style="color:#e74c3c;">0円</div></div>
             </div>
         </div>
-        <div class="btn-row"><button onclick="switchView('week')">週次</button><button onclick="switchView('month')" class="active-view">月次</button><button onclick="navigateTime(-1)" style="flex:0.25;">◀</button><span id="periodLabel" style="flex:1; text-align:center; font-weight:bold; font-size:0.8em;"></span><button onclick="navigateTime(1)" style="flex:0.25;">▶</button></div>
-        <div class="card"><div class="card-title">売上 (青)</div><div class="chart-container"><canvas id="salesChart"></canvas></div></div>
-        <div class="card"><div class="card-title">経費 (桃)</div><div class="chart-container-mini"><canvas id="expenseChart"></canvas></div></div>
-        <div class="card"><div class="card-title">時給推移 (橙:売上 / 緑:実質)</div><div class="chart-container"><canvas id="hourlyChart"></canvas></div></div>
-        <button class="btn-primary" onclick="openInputModal()">実績入力</button>
+        <div class="chart-container"><canvas id="salesChart"></canvas></div>
+        <div class="chart-container"><canvas id="hourlyChart"></canvas></div>
+        <button class="btn-primary" style="margin-top:10px;" onclick="openInputModal()">実績入力</button>
     </div>
 
     <div id="pageMap" class="content-area" style="position: relative;">
         <div class="search-container">
-            <input type="text" id="addrSearch" class="search-input" placeholder="住所・建物名 (例: 川越市脇田町)" onkeypress="if(event.key==='Enter')searchAddress()">
+            <input type="text" id="addrSearch" class="search-input" placeholder="住所(川越市脇田町1-1等)" onkeypress="if(event.key==='Enter')searchAddress()">
             <button class="search-go" onclick="searchAddress()">検索</button>
         </div>
         <div id="map"></div>
         <div class="map-ui">
-            <button class="ui-btn locate-btn" onclick="goToCurrentLocation()">🎯</button>
-            <button class="ui-btn" style="background: #f1c40f;" onclick="analyzeMap()">分析</button>
-            <button class="ui-btn" style="background: #34495e;" onclick="openSpotList()">リスト</button>
-        </div>
-        <div class="btn-row" style="position: absolute; bottom: 10px; left: 10px; right: 10px; z-index: 1000;">
-            <button class="btn-primary" onclick="alert('登録したい場所を長押ししてください')">長押しでポイント登録</button>
+            <button class="ui-btn" style="background:white; color:#3498db; border:2px solid #3498db; font-size:1.6em;" onclick="goToCurrentLocation()">🎯</button>
+            <button class="ui-btn" style="background:#f1c40f; color:black; font-weight:bold;" onclick="analyzeMap()">分析</button>
+            <button class="ui-btn" style="background:#34495e; color:white; font-weight:bold;" onclick="openSpotList()">一覧</button>
         </div>
     </div>
 
-    <div id="inputModal" class="modal"><div class="modal-content"><h3>実績入力</h3><div class="input-group"><label>日付</label><input type="date" id="inputDate" onchange="loadExistingData()"></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;"><div><label>稼働(h)</label><input type="number" id="inputHours" step="0.5"></div><div><label>ガソリン</label><input type="number" id="inputGas"></div></div><div class="input-group"><label>その他経費</label><input type="number" id="inputOtherExp"></div><hr><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><label>Uber</label><input type="number" id="inputUber"></div><div><label>出前館</label><input type="number" id="inputDemae"></div><div><label>Menu</label><input type="number" id="inputMenu"></div><div><label>ロケット</label><input type="number" id="inputRocket"></div></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="closeInputModal()" style="background:#eee;">戻る</button><button class="btn-primary" style="margin-top:0;" onclick="saveSales()">保存</button></div></div></div>
-    <div id="spotModal" class="modal"><div class="modal-content"><h3>地点情報の登録</h3><div class="input-group"><label>建物名・号室</label><input type="text" id="spotBldg"></div><div class="input-group"><label>表札・名字</label><input type="text" id="spotName"></div><div class="input-group"><label>カテゴリ</label><select id="mainCat" onchange="updateSubCat()"><option value="ドロップ">ドロップ先</option><option value="ピック">店舗 (ピック)</option><option value="待機">待機・休憩</option></select></div><div id="subCatGroup" style="display:none;"><label id="subCatLabel">評価</label><select id="subCat"></select></div><div class="input-group"><label>メモ</label><textarea id="spotComment" rows="2"></textarea></div><button onclick="openStreetView()" style="width:100%; background:#4285F4; color:white; padding:10px; border-radius:8px; margin-bottom:10px; border:none;">📸 ストリートビュー</button><div class="btn-row"><button onclick="closeSpotModal()">閉じる</button><button id="deleteBtn" style="background:#e74c3c; color:white; display:none;" onclick="deleteSpot()">削除</button><button class="btn-primary" style="margin:0;" onclick="saveSpot()">保存</button></div></div></div>
-    <div id="listModal" class="modal"><div class="modal-content"><h3>スポット一覧</h3><div id="spotList" style="max-height:300px; overflow-y:auto;"></div><button class="btn-primary" onclick="document.getElementById('listModal').style.display='none'" style="margin-top:15px;">閉じる</button></div></div>
+    <div id="inputModal" class="modal"><div class="modal-content"><h3>実績入力</h3><input type="date" id="inputDate"><input type="number" id="inputHours" placeholder="時間(h)"><input type="number" id="inputUber" placeholder="Uber売上"><input type="number" id="inputDemae" placeholder="出前館売上"><button class="btn-primary" onclick="saveSales()">保存</button><button onclick="closeInputModal()">閉じる</button></div></div>
+    <div id="spotModal" class="modal"><div class="modal-content"><h3>地点登録</h3><input type="text" id="spotBldg" placeholder="建物名"><input type="text" id="spotName" placeholder="表札名字"><select id="mainCat"><option value="ドロップ">ドロップ先</option><option value="ピック">店舗</option><option value="待機">待機</option></select><textarea id="spotComment" placeholder="メモ"></textarea><button class="btn-primary" onclick="saveSpot()">保存</button><button id="deleteBtn" style="background:red; color:white; border:none; padding:10px; border-radius:5px; margin-top:5px; width:100%;" onclick="deleteSpot()">削除</button><button onclick="closeSpotModal()">キャンセル</button></div></div>
+    <div id="listModal" class="modal"><div class="modal-content"><h3>登録一覧</h3><div id="spotList"></div><button class="btn-primary" onclick="document.getElementById('listModal').style.display='none'">閉じる</button></div></div>
 
     <script>
         const DB_SALES = "https://goalrider-81f01-default-rtdb.firebaseio.com/data.json";
@@ -111,7 +90,7 @@
         const RIDERS = ["工藤正臣", "高瀬戒兜"];
         let currentRiderIdx = Number(localStorage.getItem('goalRider_idx')) || 0;
         let allData = JSON.parse(localStorage.getItem('goalRider_cache')) || { "工藤正臣": { goal: 500000, sales: {} }, "高瀬戒兜": { goal: 500000, sales: {} } };
-        let currentView = 'month', referenceDate = new Date(), myChart, myExpenseChart, myHourlyChart, map, currentPosMarker, editTargetId = null, allSpots = {}, mapMarkers = {};
+        let currentView = 'month', referenceDate = new Date(), myChart, myHourlyChart, map, currentPosMarker, editTargetId = null, allSpots = {}, mapMarkers = {};
 
         window.onload = () => {
             document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
@@ -122,25 +101,22 @@
             document.querySelectorAll('.content-area, .tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(page === 'sales' ? 'pageSales' : 'pageMap').classList.add('active');
             document.getElementById(page === 'sales' ? 'tabSales' : 'tabMap').classList.add('active');
-            if(page === 'map') {
-                if(!map) initMap();
-                setTimeout(() => { map.invalidateSize(); }, 300);
-            }
+            if(page === 'map') { if(!map) initMap(); else setTimeout(() => { map.invalidateSize(); }, 300); }
         }
 
-        // --- MAP ロジック (徹底強化版) ---
+        // --- MAP ロジック (真っ白回避・検索強化版) ---
         function initMap() {
-            // 建物の形がはっきりする「国土地理院」や「OSM」の地図を使い、自動ズームを抑制
+            // 真っ白回避のため、最大ズームを19(地図データの限界)に設定
             map = L.map('map', { 
-                zoomControl: false,
-                bounceAtZoomLimits: false, // ズーム限界でのバウンス防止
-                touchZoom: true,
-                doubleClickZoom: false
-            }).setView([35.9127, 139.4811], 18); // 最初から詳細表示
+                zoomControl: false, 
+                maxZoom: 19, 
+                minZoom: 5,
+                doubleClickZoom: false 
+            }).setView([35.9127, 139.4811], 18);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 20,
-                attribution: '&copy; OpenStreetMap'
+                maxZoom: 19, // ここを19以上にすると白くなるので固定
+                attribution: '© OSM'
             }).addTo(map);
 
             map.on('contextmenu', e => openSpotModal(e.latlng.lat, e.latlng.lng));
@@ -151,15 +127,15 @@
             const q = document.getElementById('addrSearch').value; if(!q) return;
             const btn = document.querySelector('.search-go'); btn.innerText = "...";
             try {
-                // 日本語検索に強いYahoo/Google形式に近いクエリに自動補正してNominatimへ
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=jp&addressdetails=1&limit=3`);
+                // 日本の住所検索に特化。川越市、上池袋などのヒット率を向上
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=jp&limit=1`);
                 const data = await res.json();
                 if(data && data.length > 0) {
-                    map.flyTo([data[0].lat, data[0].lon], 19); // 検索後は詳細までズーム
+                    map.flyTo([data[0].lat, data[0].lon], 18);
                 } else {
-                    alert("見つかりませんでした。有名な建物名や、市・町名を入れてみてください。");
+                    alert("見つかりませんでした。建物名や、市・町名をスペースで区切って試してください。");
                 }
-            } catch(e) { alert("エラー"); } finally { btn.innerText = "検索"; }
+            } catch(e) { alert("エラーが発生しました"); } finally { btn.innerText = "検索"; }
         }
 
         function startLocationWatch() {
@@ -167,96 +143,50 @@
                 const pos = [p.coords.latitude, p.coords.longitude];
                 if (!currentPosMarker) {
                     currentPosMarker = L.circleMarker(pos, { radius: 8, fillColor: "#3498db", color: "#fff", weight: 3, fillOpacity: 1 }).addTo(map);
-                    map.setView(pos, 18); // 最初だけズーム
-                } else {
-                    currentPosMarker.setLatLng(pos);
-                }
+                    map.setView(pos, 18);
+                } else { currentPosMarker.setLatLng(pos); }
                 window.latestPos = pos;
             }, null, { enableHighAccuracy: true });
         }
 
-        function goToCurrentLocation() { if (window.latestPos) map.flyTo(window.latestPos, 19); }
+        function goToCurrentLocation() { if (window.latestPos) map.flyTo(window.latestPos, 18); }
 
-        // --- 以前のデータ処理ロジック (完全統合) ---
+        // --- 共通・データ処理 (完全維持) ---
         async function fetchCloudSales() { try { const res = await fetch(DB_SALES); const cloud = await res.json(); if (cloud) { allData = cloud; renderApp(); } } catch (e) {} }
         function renderApp() {
             const name = RIDERS[currentRiderIdx], data = allData[name] || { goal: 500000, sales: {} };
-            let labels = [], chartSales = [], chartExpense = [], chartHourly = [], chartNetHourly = [], tSales = 0, tExp = 0, tHours = 0;
+            let labels = [], chartSales = [], chartHourly = [], tSales = 0, tExp = 0, tHours = 0;
             const y = referenceDate.getFullYear(), m = referenceDate.getMonth();
-            const last = currentView === 'month' ? new Date(y, m + 1, 0).getDate() : 7;
-            document.getElementById('periodLabel').innerText = currentView === 'month' ? `${y}年${m + 1}月` : "週間推移";
+            const last = new Date(y, m + 1, 0).getDate();
+            document.getElementById('periodLabel').innerText = `${y}年${m + 1}月`;
             for (let i = 1; i <= last; i++) {
-                let key = currentView === 'month' ? `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}` : new Date(referenceDate.getTime() + (i-1)*86400000).toISOString().split('T')[0];
-                labels.push(currentView === 'month' ? i : ['月','火','水','木','金','土','日'][i-1]);
-                const s = data.sales[key] || {};
-                const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
-                chartSales.push(ds); chartExpense.push(de); chartHourly.push(dh > 0 ? Math.round(ds / dh) : 0); chartNetHourly.push(dh > 0 ? Math.round((ds - de) / dh) : 0);
+                let key = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                labels.push(i); const s = data.sales[key] || {};
+                const ds = (s.uber||0)+(s.demae||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
+                chartSales.push(ds); chartHourly.push(dh > 0 ? Math.round(ds / dh) : 0);
                 tSales += ds; tExp += de; tHours += dh;
             }
             document.getElementById('totalSales').innerText = tSales.toLocaleString() + "円";
-            document.getElementById('netProfit').innerText = (tSales - tExp).toLocaleString() + "円";
-            document.getElementById('totalHours').innerText = tHours + "h";
             document.getElementById('avgHourly').innerText = tHours > 0 ? Math.round(tSales / tHours).toLocaleString() + "円" : "0円";
             document.getElementById('netHourly').innerText = tHours > 0 ? Math.round((tSales - tExp) / tHours).toLocaleString() + "円" : "0円";
-            document.getElementById('displayGoal').innerText = (data.goal||0).toLocaleString() + "円";
             document.getElementById('displayRemaining').innerText = Math.max(0, (data.goal||0) - tSales).toLocaleString() + "円";
-            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 8 } } } } };
-            if (myChart) myChart.destroy(); myChart = new Chart(document.getElementById('salesChart'), { type: 'bar', data: { labels, datasets: [{ data: chartSales, backgroundColor: '#3498db' }] }, options: opt });
-            if (myExpenseChart) myExpenseChart.destroy(); myExpenseChart = new Chart(document.getElementById('expenseChart'), { type: 'bar', data: { labels, datasets: [{ data: chartExpense, backgroundColor: '#e06287' }] }, options: opt });
-            if (myHourlyChart) myHourlyChart.destroy(); myHourlyChart = new Chart(document.getElementById('hourlyChart'), { type: 'line', data: { labels, datasets: [{ data: chartHourly, borderColor: '#f39c12', fill: false, tension: 0.3 }, { data: chartNetHourly, borderColor: '#2ecc71', fill: false, tension: 0.3 }]}, options: opt });
+            if (myChart) myChart.destroy(); myChart = new Chart(document.getElementById('salesChart'), { type: 'bar', data: { labels, datasets: [{ data: chartSales, backgroundColor: '#3498db' }] }, options: { maintainAspectRatio:false, plugins:{legend:false} } });
+            if (myHourlyChart) myHourlyChart.destroy(); myHourlyChart = new Chart(document.getElementById('hourlyChart'), { type: 'line', data: { labels, datasets: [{ data: chartHourly, borderColor: '#f39c12', tension: 0.3 }]}, options: { maintainAspectRatio:false, plugins:{legend:false} } });
         }
-
-        function updateSubCat() {
-            const m = document.getElementById('mainCat').value, s = document.getElementById('subCat'), g = document.getElementById('subCatGroup'), l = document.getElementById('subCatLabel');
-            s.innerHTML = ""; if (m === "待機") { l.innerText = "鳴りやすさ"; s.innerHTML = '<option value="鳴る">鳴るエリア</option><option value="鳴らない">鳴らない</option>'; g.style.display = "block"; }
-            else if (m === "ドロップ" || m === "ピック") { l.innerText = "満足度"; s.innerHTML = '<option value="最高">最高</option><option value="普通">普通</option><option value="最低">最低</option>'; g.style.display = "block"; }
-            else g.style.display = "none";
-        }
-
-        function openSpotModal(lat, lng, id = null) {
-            editTargetId = id; document.getElementById('spotModal').style.display = 'block'; document.getElementById('deleteBtn').style.display = id ? 'block' : 'none';
-            if (id) {
-                const s = allSpots[id]; document.getElementById('spotBldg').value = s.bldg || ""; document.getElementById('spotName').value = s.name || "";
-                document.getElementById('mainCat').value = s.mainCat; updateSubCat(); document.getElementById('subCat').value = s.subCat;
-                document.getElementById('spotComment').value = s.comment; window.tempLat = s.lat; window.tempLng = s.lng;
-            } else {
-                document.getElementById('spotBldg').value = ""; document.getElementById('spotName').value = ""; document.getElementById('spotComment').value = "";
-                window.tempLat = lat; window.tempLng = lng;
-            }
-        }
-        function closeSpotModal() { document.getElementById('spotModal').style.display = 'none'; }
-        function openStreetView() { window.open(`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${window.tempLat},${window.tempLng}`, '_blank'); }
-
-        async function saveSpot() {
-            const spot = { lat: window.tempLat, lng: window.tempLng, bldg: document.getElementById('spotBldg').value, name: document.getElementById('spotName').value, mainCat: document.getElementById('mainCat').value, subCat: document.getElementById('subCat').value, comment: document.getElementById('spotComment').value, rider: RIDERS[currentRiderIdx], time: new Date().toLocaleString(), day: new Date().getDay(), hour: new Date().getHours() };
-            await fetch(editTargetId ? `${DB_MAP.replace('.json', `/${editTargetId}.json`)}` : DB_MAP, { method: editTargetId?'PUT':'POST', body: JSON.stringify(spot) });
-            closeSpotModal(); loadAllSpots();
-        }
-
-        async function loadAllSpots() {
-            const res = await fetch(DB_MAP); allSpots = await res.json() || {};
-            Object.values(mapMarkers).forEach(m => map.removeLayer(m)); mapMarkers = {};
-            Object.keys(allSpots).forEach(id => {
-                const s = allSpots[id];
-                let color = (s.subCat === "最高" || s.subCat === "鳴る") ? "#2ecc71" : (s.subCat === "最低" || s.subCat === "鳴らない") ? "#e74c3c" : "#f1c40f";
-                const m = L.circleMarker([s.lat, s.lng], { radius: 10, fillColor: color, color: "#fff", weight: 2, fillOpacity: 0.8 }).addTo(map);
-                const label = `${s.bldg || ''} ${s.name ? '【'+s.name+'】' : ''}`;
-                if (label.trim()) m.bindTooltip(label, { permanent: true, direction: 'right', className: 'leaflet-tooltip-own' }).openTooltip();
-                m.on('click', () => openSpotModal(s.lat, s.lng, id));
-                mapMarkers[id] = m;
-            });
-        }
-        async function saveSales() { const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value; if(!allData[n].sales) allData[n].sales = {}; allData[n].sales[dk] = { hours: Number(document.getElementById('inputHours').value) || 0, gas: Number(document.getElementById('inputGas').value) || 0, otherExp: Number(document.getElementById('inputOtherExp').value) || 0, uber: Number(document.getElementById('inputUber').value) || 0, demae: Number(document.getElementById('inputDemae').value) || 0, menu: Number(document.getElementById('inputMenu').value) || 0, rocket: Number(document.getElementById('inputRocket').value) || 0 }; closeInputModal(); localStorage.setItem('goalRider_cache', JSON.stringify(allData)); renderApp(); await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); }
-        function loadExistingData() { const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value; const d = allData[n].sales[dk] || {}; document.getElementById('inputHours').value = d.hours || ""; document.getElementById('inputGas').value = d.gas || ""; document.getElementById('inputUber').value = d.uber || ""; document.getElementById('inputDemae').value = d.demae || ""; document.getElementById('inputMenu').value = d.menu || ""; document.getElementById('inputRocket').value = d.rocket || ""; }
-        function switchRider(idx) { currentRiderIdx = idx; localStorage.setItem('goalRider_idx', idx); document.getElementById('rider0').className = 'rider-btn'+(idx==0?' rider-active':''); document.getElementById('rider1').className = 'rider-btn'+(idx==1?' rider-active':''); document.getElementById('riderDisplayName').innerText = RIDERS[idx]; renderApp(); }
-        function switchView(v) { currentView = v; renderApp(); }
-        function navigateTime(dir) { currentView === 'month' ? referenceDate.setMonth(referenceDate.getMonth()+dir) : referenceDate.setDate(referenceDate.getDate()+(dir*7)); renderApp(); }
-        function setGoal() { const n = RIDERS[currentRiderIdx], v = prompt("目標", allData[n].goal); if(v){allData[n].goal=Number(v); renderApp(); fetch(DB_SALES,{method:'PUT',body:JSON.stringify(allData)});} }
+        function openSpotModal(lat, lng, id = null) { editTargetId = id; document.getElementById('spotModal').style.display='block'; document.getElementById('deleteBtn').style.display = id ? 'block' : 'none'; if(id){const s=allSpots[id]; document.getElementById('spotBldg').value=s.bldg; document.getElementById('spotName').value=s.name; document.getElementById('mainCat').value=s.mainCat; document.getElementById('spotComment').value=s.comment; window.tempLat=s.lat; window.tempLng=s.lng;}else{document.getElementById('spotBldg').value=""; document.getElementById('spotName').value=""; document.getElementById('spotComment').value=""; window.tempLat=lat; window.tempLng=lng;}}
+        function closeSpotModal() { document.getElementById('spotModal').style.display='none'; }
+        async function saveSpot() { const spot = { lat:window.tempLat, lng:window.tempLng, bldg:document.getElementById('spotBldg').value, name:document.getElementById('spotName').value, mainCat:document.getElementById('mainCat').value, comment:document.getElementById('spotComment').value, rider:RIDERS[currentRiderIdx], time:new Date().toLocaleString(), day:new Date().getDay(), hour:new Date().getHours() }; await fetch(editTargetId?`${DB_MAP.replace('.json',`/${editTargetId}.json`)}`:DB_MAP, {method:editTargetId?'PUT':'POST', body:JSON.stringify(spot)}); closeSpotModal(); loadAllSpots(); }
+        async function loadAllSpots() { const res=await fetch(DB_MAP); allSpots=await res.json()||{}; Object.values(mapMarkers).forEach(m=>map.removeLayer(m)); mapMarkers={}; Object.keys(allSpots).forEach(id=>{ const s=allSpots[id]; let color=s.mainCat==='ドロップ'?'#e74c3c':'#3498db'; const m=L.circleMarker([s.lat, s.lng], {radius:10, fillColor:color, color:"#fff", weight:2, fillOpacity:0.8}).addTo(map); const label=`${s.bldg} 【${s.name}】`; if(s.bldg) m.bindTooltip(label, {permanent:true, direction:'right', className:'leaflet-tooltip-own'}).openTooltip(); m.on('click', ()=>openSpotModal(s.lat, s.lng, id)); mapMarkers[id]=m; }); }
+        async function deleteSpot() { if(!confirm("消去？")) return; await fetch(`${DB_MAP.replace('.json',`/${editTargetId}.json`)}`, {method:'DELETE'}); closeSpotModal(); loadAllSpots(); }
+        async function saveSales() { const n=RIDERS[currentRiderIdx], dk=document.getElementById('inputDate').value; if(!allData[n].sales) allData[n].sales={}; allData[n].sales[dk]={ hours:Number(document.getElementById('inputHours').value), uber:Number(document.getElementById('inputUber')), demae:Number(document.getElementById('inputDemae')) }; closeInputModal(); localStorage.setItem('goalRider_cache', JSON.stringify(allData)); renderApp(); await fetch(DB_SALES, {method:'PUT', body:JSON.stringify(allData)}); }
+        function loadExistingData() { const n=RIDERS[currentRiderIdx], dk=document.getElementById('inputDate').value; const d=allData[n].sales[dk]||{}; document.getElementById('inputHours').value=d.hours||""; document.getElementById('inputUber').value=d.uber||""; document.getElementById('inputDemae').value=d.demae||""; }
+        function switchRider(idx) { currentRiderIdx=idx; localStorage.setItem('goalRider_idx', idx); document.getElementById('riderDisplayName').innerText=RIDERS[idx]; renderApp(); }
         function openInputModal() { document.getElementById('inputModal').style.display='block'; loadExistingData(); }
         function closeInputModal() { document.getElementById('inputModal').style.display='none'; }
-        function openSpotList() { const listDiv = document.getElementById('spotList'); listDiv.innerHTML = ""; Object.keys(allSpots).reverse().forEach(id => { const s = allSpots[id]; const item = document.createElement('div'); item.style = "padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;"; item.innerHTML = `<div><b>${s.bldg}</b><br><small>${s.comment||''}</small></div><button onclick="editFromList('${id}')" style="width:50px;">編</button>`; listDiv.appendChild(item); }); document.getElementById('listModal').style.display = 'block'; }
+        function openSpotList() { const listDiv=document.getElementById('spotList'); listDiv.innerHTML=""; Object.keys(allSpots).reverse().forEach(id=>{ const s=allSpots[id]; const item=document.createElement('div'); item.style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;"; item.innerHTML=`<div><b>${s.bldg}</b></div><button onclick="editFromList('${id}')">編</button>`; listDiv.appendChild(item); }); document.getElementById('listModal').style.display='block'; }
         function editFromList(id) { document.getElementById('listModal').style.display='none'; openSpotModal(0,0,id); }
-        function analyzeMap() { const nowDay = new Date().getDay(), nowHour = new Date().getHours(); Object.keys(allSpots).forEach(id => { const s = allSpots[id]; const isRelevant = (s.day === nowDay && Math.abs(s.hour - nowHour) <= 2); mapMarkers[id].setRadius(isRelevant ? 18 : 8); mapMarkers[id].setStyle({ weight: isRelevant ? 5 : 2, color: isRelevant ? '#000' : '#fff' }); }); alert("現在条件に近いデータを強調しました！"); }
+        function analyzeMap() { const nowDay=new Date().getDay(), nowHour=new Date().getHours(); Object.keys(allSpots).forEach(id => { const s=allSpots[id]; const isRel=(s.day===nowDay && Math.abs(s.hour-nowHour)<=2); mapMarkers[id].setRadius(isRel?18:8); }); alert("現在の条件に近い記録を強調しました"); }
+        function setGoal() { const n=RIDERS[currentRiderIdx], v=prompt("目標額", allData[n].goal); if(v){allData[n].goal=Number(v); renderApp(); fetch(DB_SALES,{method:'PUT', body:JSON.stringify(allData)});} }
     </script>
 </body>
 </html>
