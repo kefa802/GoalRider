@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Biz - V1.01.1</title>
+    <title>Goal Rider Biz - V1.01.2</title>
 
     <link rel="icon" href="https://img.icons8.com/clouds/256/delivery-man.png" type="image/png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/clouds/256/delivery-man.png">
@@ -39,10 +39,13 @@
 
         .chart-container { height: 85px; position: relative; margin-bottom: 2px; }
         
-        /* ボタンコンテナ：実績入力と分析を並べる */
+        /* メイン画面のボタンレイアウト（実績入力と分析を並べる） */
         .action-button-row { display: flex; gap: 6px; padding: 4px 0; }
-        .btn-primary { flex: 3; background: #2ecc71; color: white; border: none; padding: 12px; font-size: 1.0em; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .btn-main-entry { flex: 3; background: #2ecc71; color: white; border: none; padding: 12px; font-size: 1.0em; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .btn-analyze-trigger { flex: 1; background: #95a5a6; color: white; border: none; padding: 12px; font-size: 0.85em; border-radius: 10px; cursor: pointer; font-weight: bold; }
+
+        /* モーダル内の汎用プライバリボタン（フルサイズ） */
+        .btn-modal-primary { width: 100%; background: #2ecc71; color: white; border: none; padding: 12px; font-size: 1.0em; border-radius: 10px; cursor: pointer; font-weight: bold; }
 
         #map { width: 100%; height: 100%; border-radius: 10px; z-index: 1; background: #eee; }
         .map-ui { position: absolute; bottom: 85px; right: 15px; display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
@@ -76,7 +79,7 @@
         <button id="tabMap" class="tab-btn" onclick="showPage('map')">マップ</button>
     </div>
     
-    <div class="version-bar">GoalRider V1.01.1</div>
+    <div class="version-bar">GoalRider V1.01.2</div>
 
     <div id="pageSales" class="content-area active">
         <div class="rider-selector">
@@ -97,7 +100,7 @@
                 <div><div class="stats-label">売上合計</div><div class="stats-val" id="totalSales">0円</div></div>
                 <div><div class="stats-label" style="color:#e74c3c;">目標まで</div><div class="stats-val" id="displayRemaining" style="color:#e74c3c;">0円</div></div>
                 <div><div class="stats-label" id="dailyRequiredLabel">1日必要額 (今日込)</div><div class="stats-val" style="color:#9b59b6;" id="dailyRequired">0円</div></div>
-                <div><div class="stats-label">経費合計</div><div class="stats-val" style="color:#e67e22;" id="totalExpense">0円</div></div>
+                <div><div class="stats-label">経費合計</div><div class="stats-val" id="totalExpense">0円</div></div>
                 <div><div class="stats-label">売上時給</div><div class="stats-val" id="avgHourly">0円</div></div>
                 <div><div class="stats-label">実質時給</div><div class="stats-val" style="color:#2ecc71;" id="netHourly">0円</div></div>
             </div>
@@ -112,7 +115,7 @@
         <div class="card"><div class="stats-label" style="font-size:0.6em;">時給推移</div><div class="chart-container"><canvas id="hourlyChart"></canvas></div></div>
         
         <div class="action-button-row">
-            <button class="btn-primary" onclick="openInputModal()">実績入力</button>
+            <button class="btn-main-entry" onclick="openInputModal()">実績入力</button>
             <button class="btn-analyze-trigger" onclick="openAnalysisModal()">分析</button>
         </div>
     </div>
@@ -153,7 +156,7 @@
                 <div class="input-group"><label>Menu</label><input type="number" id="inputMenu"></div>
                 <div class="input-group"><label>ロケット</label><input type="number" id="inputRocket"></div>
             </div>
-            <button class="btn-primary" style="margin-top:10px;" onclick="saveSales()">保存して閉じる</button>
+            <button class="btn-modal-primary" style="margin-top:10px;" onclick="saveSales()">保存して閉じる</button>
             <button onclick="closeInputModal()" style="width:100%; border:none; background:none; color:#777; padding:10px;">閉じる</button>
         </div>
     </div>
@@ -165,12 +168,12 @@
             <div class="analysis-chart-box"><canvas id="dayAnalysisChart"></canvas></div>
             <div class="stats-label" style="margin-bottom: 5px;">天気別 平均時給</div>
             <div class="analysis-chart-box"><canvas id="weatherAnalysisChart"></canvas></div>
-            <button class="btn-primary" onclick="closeAnalysisModal()">閉じる</button>
+            <button class="btn-modal-primary" onclick="closeAnalysisModal()">閉じる</button>
         </div>
     </div>
 
-    <div id="spotModal" class="modal"><div class="modal-content"><h3>地点メモ</h3><div id="spotInfo" style="font-size: 0.65em; color: #666; margin-bottom: 8px;"></div><div class="input-group"><label>カテゴリ</label><select id="mainCat" onchange="updateSubCat()"><option value="">選択...</option><option value="待機">待機</option><option value="ピック">ピック</option><option value="ドロップ">ドロップ</option></select></div><div class="input-group" id="subCatGroup" style="display:none;"><label id="subCatLabel">評価</label><select id="subCat"></select></div><div class="input-group"><label>コメント</label><textarea id="spotComment" rows="3"></textarea></div><button class="btn-primary" onclick="saveSpot()">保存</button><button id="deleteBtn" style="background:#e74c3c; color:white; border:none; width:100%; padding:10px; border-radius:10px; margin-top:8px; display:none;" onclick="deleteSpot()">削除</button><button onclick="closeSpotModal()" style="width:100%; border:none; background:none; margin-top:8px; color:#666;">キャンセル</button></div></div>
-    <div id="listModal" class="modal"><div class="modal-content"><h3>スポット一覧</h3><div id="spotList" style="max-height:300px; overflow-y:auto;"></div><button class="btn-primary" onclick="document.getElementById('listModal').style.display='none'" style="margin-top:15px;">閉じる</button></div></div>
+    <div id="spotModal" class="modal"><div class="modal-content"><h3>地点メモ</h3><div id="spotInfo" style="font-size: 0.65em; color: #666; margin-bottom: 8px;"></div><div class="input-group"><label>カテゴリ</label><select id="mainCat" onchange="updateSubCat()"><option value="">選択...</option><option value="待機">待機</option><option value="ピック">ピック</option><option value="ドロップ">ドロップ</option></select></div><div class="input-group" id="subCatGroup" style="display:none;"><label id="subCatLabel">評価</label><select id="subCat"></select></div><div class="input-group"><label>コメント</label><textarea id="spotComment" rows="3"></textarea></div><button class="btn-modal-primary" onclick="saveSpot()">保存</button><button id="deleteBtn" style="background:#e74c3c; color:white; border:none; width:100%; padding:10px; border-radius:10px; margin-top:8px; display:none;" onclick="deleteSpot()">削除</button><button onclick="closeSpotModal()" style="width:100%; border:none; background:none; margin-top:8px; color:#666;">キャンセル</button></div></div>
+    <div id="listModal" class="modal"><div class="modal-content"><h3>スポット一覧</h3><div id="spotList" style="max-height:300px; overflow-y:auto;"></div><button class="btn-modal-primary" onclick="document.getElementById('listModal').style.display='none'" style="margin-top:15px;">閉じる</button></div></div>
 
     <script>
         const DB_SALES = "https://goalrider-81f01-default-rtdb.firebaseio.com/data.json";
@@ -200,7 +203,7 @@
             document.querySelectorAll('.content-area, .tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(page === 'sales' ? 'pageSales' : 'pageMap').classList.add('active');
             document.getElementById(page === 'sales' ? 'tabSales' : 'tabMap').classList.add('active');
-            if(page === 'map' && !map) initMap();
+            if(page === 'map') { if(!map) initMap(); else setTimeout(() => map.invalidateSize(), 300); }
         }
 
         function initMap() {
@@ -283,7 +286,6 @@
         }
         function closeAnalysisModal() { document.getElementById('analysisModal').style.display = 'none'; }
 
-        // --- MAP機能系 ---
         function toggleMapType() { if (mapType === 'hybrid') { map.removeLayer(hybridLayer); baseLayer.addTo(map); mapType = 'normal'; document.getElementById('layerBtn').innerText = "🛰️"; } else { map.removeLayer(baseLayer); hybridLayer.addTo(map); mapType = 'hybrid'; document.getElementById('layerBtn').innerText = "🗺️"; } }
         async function searchAddress() { const q = document.getElementById('addrSearch').value; if(!q) return; try { const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=jp&limit=1`); const data = await res.json(); if(data && data[0]) map.flyTo([data[0].lat, data[0].lon], 18); } catch(e){} }
         function analyzeMap() { const nowDay = new Date().getDay(), nowHour = new Date().getHours(); Object.keys(allSpots).forEach(id => { const s = allSpots[id]; const isRel = (s.day === nowDay && Math.abs(s.hour - nowHour) <= 2); if (mapMarkers[id]) { mapMarkers[id].setRadius(isRel ? 18 : 8); mapMarkers[id].setStyle({ weight: isRel ? 5 : 2, color: isRel ? '#000' : '#fff' }); } }); alert("分析完了！"); }
