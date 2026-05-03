@@ -16,7 +16,7 @@
     <style>
         body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 0; color: #333; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         .main-tabs { display: flex; background: #2c3e50; padding: 2px; gap: 2px; position: relative; z-index: 2000; }
-        .tab-btn { flex: 1; padding: 10px 8px; border: none; background: none; color: #bdc3c7; font-weight: bold; font-size: 0.85em; border-radius: 4px; cursor: pointer; }
+        .tab-btn { flex: 1; padding: 12px 8px; border: none; background: none; color: #bdc3c7; font-weight: bold; font-size: 0.85em; border-radius: 4px; cursor: pointer; }
         .tab-btn.active { background: #34495e; color: white; }
         
         .content-area { flex: 1; overflow-y: auto; padding: 4px 6px; box-sizing: border-box; display: none; }
@@ -31,11 +31,6 @@
         .active-view { background: #3498db !important; border-color: #2980b9 !important; color: white !important; }
 
         .card { background: white; border-radius: 8px; padding: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 6px; }
-        .header-row { display: flex; justify-content: space-between; align-items: center; gap: 4px; margin-bottom: 4px; }
-        .header-name { font-size: 0.8em; font-weight: bold; white-space: nowrap; }
-        .header-goal { font-size: 0.75em; font-weight: bold; color: #555; }
-        .set-btn { background: #eee; border: 1px solid #ccc; padding: 2px 6px; border-radius: 4px; font-size: 0.65em; }
-
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; border-top: 1px solid #eee; padding-top: 4px; }
         .stats-val { font-weight: 800; font-size: 0.95em; color: #2c3e50; line-height: 1.1; }
         .stats-label { font-size: 0.6em; color: #777; }
@@ -44,29 +39,28 @@
         .chart-container-mini { height: 50px; position: relative; margin-bottom: 2px; }
         .btn-primary { background: #2ecc71; color: white; border: none; width: 100%; padding: 10px; font-size: 1.0em; border-radius: 10px; cursor: pointer; }
 
-        #map { width: 100%; height: 100%; border-radius: 10px; z-index: 1; background: #eee; }
-        .search-container { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1500; display: flex; gap: 5px; }
-        .search-input { flex: 1; padding: 10px; border-radius: 8px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-size: 14px; background: white; }
-        .search-btn { padding: 0 15px; background: #3498db; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 0.8em; }
-        .map-ui { position: absolute; bottom: 85px; right: 15px; display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
-        .ui-btn { width: 50px; height: 50px; border-radius: 25px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 1.1em; cursor: pointer; }
-
-        /* 実績入力モーダル（天気アイコン追加） */
+        /* 実績入力モーダル */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; overflow-y: auto; }
         .modal-content { background: white; margin: 2% auto; padding: 12px; width: 94%; border-radius: 15px; box-sizing: border-box; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .weather-selector { display: flex; gap: 5px; margin-bottom: 10px; justify-content: space-between; }
-        .weather-btn { flex: 1; padding: 8px 0; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; font-size: 1.2em; cursor: pointer; filter: grayscale(100%); opacity: 0.6; }
-        .weather-btn.active { filter: grayscale(0%); opacity: 1; border-color: #3498db; background: #ebf5fb; }
+        
+        /* 天気選択：はっきりしたデザインに変更 */
+        .weather-selector { display: flex; gap: 4px; margin-bottom: 12px; justify-content: space-between; }
+        .weather-btn { flex: 1; padding: 10px 0; border: 2px solid #eee; border-radius: 10px; background: white; cursor: pointer; font-size: 1.4em; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .weather-btn img { width: 28px; height: 28px; }
+        .weather-btn.active[data-w="大雨"] { border-color: #9b59b6; background: #f4ecf7; }
+        .weather-btn.active[data-w="雨"] { border-color: #3498db; background: #ebf5fb; }
+        .weather-btn.active[data-w="小雨"] { border-color: #76d7c4; background: #e8f8f5; }
+        .weather-btn.active[data-w="曇り"] { border-color: #95a5a6; background: #f2f4f4; }
+        .weather-btn.active[data-w="晴れ"] { border-color: #f39c12; background: #fef5e7; }
         
         .compact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .input-group { margin-bottom: 8px; }
         .input-group label { display: block; margin-bottom: 2px; font-weight: bold; font-size: 0.75em; color: #444; }
-        input, select, textarea { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1em; }
-        hr { border: 0; border-top: 1px solid #eee; margin: 6px 0; }
+        input, select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1em; }
         
-        .version-label { text-align: center; font-size: 0.6em; color: #999; padding: 4px; background: #f4f4f4; }
-        .rule-btn { background: none; border: 1px solid #3498db; color: #3498db; padding: 2px 8px; border-radius: 12px; font-size: 0.7em; font-weight: bold; }
+        /* 画面最下部のバージョン表示 */
+        .app-footer { background: #2c3e50; color: #7f8c8d; font-size: 0.65em; text-align: center; padding: 4px 0; font-weight: bold; }
+        .rule-btn { background: #f1c40f; border: none; color: #2c3e50; padding: 4px 10px; border-radius: 20px; font-size: 0.75em; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -81,228 +75,140 @@
             <button id="rider0" class="rider-btn" onclick="switchRider(0)">工藤正臣</button>
             <button id="rider1" class="rider-btn" onclick="switchRider(1)">高瀬戒兜</button>
         </div>
-        
         <div class="btn-row">
             <button id="btnWeek" class="view-btn" onclick="switchView('week')">週間分析</button>
             <button id="btnMonth" class="view-btn active-view" onclick="switchView('month')">月間分析</button>
         </div>
-
         <div class="card">
-            <div class="header-row">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                 <div class="header-name" id="riderDisplayName">---</div>
-                <div class="header-goal">目標: <span id="displayGoal">0</span>円</div>
-                <button class="set-btn" onclick="setGoal()">設定</button>
+                <div style="font-size: 0.75em; font-weight: bold;">目標: <span id="displayGoal">0</span>円</div>
+                <button class="set-btn" style="padding:2px 6px; font-size:0.65em;" onclick="setGoal()">設定</button>
             </div>
             <div class="stats-grid">
                 <div><div class="stats-label">売上合計</div><div class="stats-val" id="totalSales">0円</div></div>
                 <div><div class="stats-label" style="color:#e74c3c;">目標まで</div><div class="stats-val" id="displayRemaining" style="color:#e74c3c;">0円</div></div>
-                <div><div class="stats-label" id="dailyRequiredLabel">1日必要額 (今日込)</div><div class="stats-val" style="color:#9b59b6;" id="dailyRequired">0円</div></div>
-                <div><div class="stats-label">経費合計</div><div class="stats-val" style="color:#e67e22;" id="totalExpense">0円</div></div>
-                <div><div class="stats-label">売上時給</div><div class="stats-val" id="avgHourly">0円</div></div>
+                <div><div class="stats-label">経費合計</div><div class="stats-val" id="totalExpense">0円</div></div>
                 <div><div class="stats-label">実質時給</div><div class="stats-val" style="color:#2ecc71;" id="netHourly">0円</div></div>
             </div>
         </div>
-
         <div class="btn-row">
-            <button onclick="navigatePeriod(-1)" style="flex:0.25; padding:6px;">◀</button>
-            <span id="periodLabel" style="flex:1; text-align:center; align-self:center; font-weight:bold; font-size:0.75em;"></span>
-            <button onclick="navigatePeriod(1)" style="flex:0.25; padding:6px;">▶</button>
+            <button onclick="navigatePeriod(-1)" style="flex:0.2;">◀</button>
+            <span id="periodLabel" style="flex:1; text-align:center; font-weight:bold; font-size:0.8em;"></span>
+            <button onclick="navigatePeriod(1)" style="flex:0.2;">▶</button>
         </div>
-
-        <div class="card"><div class="stats-label" style="font-size:0.6em;">売上推移</div><div class="chart-container"><canvas id="salesChart"></canvas></div></div>
-        <div class="card"><div class="stats-label" style="font-size:0.6em;">経費推移</div><div class="chart-container-mini"><canvas id="expenseChart"></canvas></div></div>
-        <div class="card"><div class="stats-label" style="font-size:0.6em;">時給推移 (橙/緑)</div><div class="chart-container"><canvas id="hourlyChart"></canvas></div></div>
-        
+        <div class="card"><div class="chart-container"><canvas id="salesChart"></canvas></div></div>
+        <div class="card"><div class="chart-container-mini"><canvas id="expenseChart"></canvas></div></div>
+        <div class="card"><div class="chart-container-mini"><canvas id="hourlyChart"></canvas></div></div>
         <button class="btn-primary" onclick="openInputModal()">実績入力</button>
     </div>
 
     <div id="pageMap" class="content-area" style="position: relative; padding:0;">
-        <div class="search-container">
-            <input type="text" id="addrSearch" class="search-input" placeholder="住所・建物名検索" onkeypress="if(event.key==='Enter')searchAddress()">
-            <button class="search-btn" onclick="searchAddress()">検索</button>
-        </div>
-        <div id="map"></div>
-        <div class="map-ui">
-            <button class="ui-btn" style="background:#fff; color:#2c3e50; font-size:1.5em; border:2px solid #2c3e50;" onclick="toggleMapType()" id="layerBtn">🗺️</button>
-            <button class="ui-btn" style="background:white; color:#3498db; border:2px solid #3498db; font-size:1.6em;" onclick="goToCurrentLocation()">🎯</button>
-            <button class="ui-btn" style="background:#f1c40f; color:black; font-weight:bold; font-size:0.7em;" onclick="analyzeMap()">分析</button>
-            <button class="ui-btn" style="background:#34495e; color:white; font-size:0.7em; font-weight:bold;" onclick="openSpotList()">リスト</button>
-        </div>
+        <div id="map" style="width:100%; height:100%;"></div>
     </div>
 
     <div id="inputModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 style="margin: 0; font-size: 1.1em;">実績入力</h3>
-                <button class="rule-btn" onclick="showInputRule()">💡ルール</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3 style="margin: 0; font-size: 1.2em;">実績入力</h3>
+                <button class="rule-btn" onclick="alert('【判定ルール】\n1時間以上雨が降っていたら雨を選択。\n1時間以内なら「曇り」または「晴れ」を選択してください。')">💡判定ルール</button>
             </div>
-            
+
             <div class="weather-selector" id="weatherSelector">
-                <button class="weather-btn" onclick="setWeather('大雨')" title="大雨">⛈️</button>
-                <button class="weather-btn" onclick="setWeather('雨')" title="雨">🌧️</button>
-                <button class="weather-btn" onclick="setWeather('小雨')" title="小雨">🌦️</button>
-                <button class="weather-btn" onclick="setWeather('曇り')" title="曇り">☁️</button>
-                <button class="weather-btn" onclick="setWeather('晴れ')" title="晴れ">☀️</button>
+                <button class="weather-btn" data-w="大雨" onclick="setWeather('大雨')">⛈️</button>
+                <button class="weather-btn" data-w="雨" onclick="setWeather('雨')">🌧️</button>
+                <button class="weather-btn" data-w="小雨" onclick="setWeather('小雨')">🌦️</button>
+                <button class="weather-btn" data-w="曇り" onclick="setWeather('曇り')">☁️</button>
+                <button class="weather-btn" data-w="晴れ" onclick="setWeather('晴れ')">☀️</button>
             </div>
 
             <div class="input-group"><label>日付</label><input type="date" id="inputDate" onchange="loadExistingData()"></div>
             <div class="compact-grid">
-                <div class="input-group"><label>稼働(h)</label><input type="number" id="inputHours" step="0.5" placeholder="0"></div>
-                <div class="input-group"><label>ガソリン</label><input type="number" id="inputGas" placeholder="0"></div>
+                <div class="input-group"><label>稼働(h)</label><input type="number" id="inputHours" step="0.5"></div>
+                <div class="input-group"><label>ガソリン</label><input type="number" id="inputGas"></div>
             </div>
-            <div class="input-group" style="margin-bottom:0;"><label>その他経費</label><input type="number" id="inputOtherExp" placeholder="0"></div>
-            <hr>
+            <div class="input-group"><label>その他経費</label><input type="number" id="inputOtherExp"></div>
+            <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
             <div class="compact-grid">
-                <div class="input-group"><label>Uber</label><input type="number" id="inputUber" placeholder="0"></div>
-                <div class="input-group"><label>出前館</label><input type="number" id="inputDemae" placeholder="0"></div>
-                <div class="input-group"><label>Menu</label><input type="number" id="inputMenu" placeholder="0"></div>
-                <div class="input-group"><label>ロケット</label><input type="number" id="inputRocket" placeholder="0"></div>
+                <div class="input-group"><label>Uber</label><input type="number" id="inputUber"></div>
+                <div class="input-group"><label>出前館</label><input type="number" id="inputDemae"></div>
+                <div class="input-group"><label>Menu</label><input type="number" id="inputMenu"></div>
+                <div class="input-group"><label>ロケット</label><input type="number" id="inputRocket"></div>
             </div>
-            <button class="btn-primary" onclick="saveSales()">保存して閉じる</button>
-            <button onclick="closeInputModal()" style="width:100%; border:none; background:none; color:#777; padding:8px;">閉じる</button>
+            <button class="btn-primary" style="margin-top:10px;" onclick="saveSales()">保存して閉じる</button>
+            <button onclick="closeInputModal()" style="width:100%; border:none; background:none; color:#777; padding:10px;">閉じる</button>
         </div>
     </div>
 
-    <div id="spotModal" class="modal">
-        <div class="modal-content">
-            <h3 id="spotModalTitle" style="margin-top:0;">地点メモ</h3>
-            <div id="spotInfo" style="font-size: 0.65em; color: #666; margin-bottom: 8px;"></div>
-            <div class="input-group"><label>カテゴリ</label><select id="mainCat" onchange="updateSubCat()"><option value="">選択...</option><option value="待機">待機</option><option value="ピック">ピック</option><option value="ドロップ">ドロップ</option></select></div>
-            <div class="input-group" id="subCatGroup" style="display:none;"><label id="subCatLabel">評価</label><select id="subCat"></select></div>
-            <div class="input-group"><label>コメント</label><textarea id="spotComment" rows="3"></textarea></div>
-            <button class="btn-primary" onclick="saveSpot()">保存</button>
-            <button id="deleteBtn" style="background:#e74c3c; color:white; border:none; width:100%; padding:10px; border-radius:10px; margin-top:8px; display:none;" onclick="deleteSpot()">削除</button>
-            <button onclick="closeSpotModal()" style="width:100%; border:none; background:none; margin-top:8px; color:#666;">キャンセル</button>
-        </div>
-    </div>
-
-    <div id="listModal" class="modal"><div class="modal-content"><h3>スポット一覧</h3><div id="spotList" style="max-height:300px; overflow-y:auto;"></div><button class="btn-primary" onclick="document.getElementById('listModal').style.display='none'" style="margin-top:15px;">閉じる</button></div></div>
-
-    <div class="version-label">GoalRider V1.00.1</div>
+    <div class="app-footer">GoalRider V1.00.1</div>
 
     <script>
         const DB_SALES = "https://goalrider-81f01-default-rtdb.firebaseio.com/data.json";
-        const DB_MAP = "https://goalrider-81f01-default-rtdb.firebaseio.com/spots.json";
         const RIDERS = ["工藤正臣", "高瀬戒兜"];
-        const DEFAULT_GOAL = 300000;
-        
         let currentRiderIdx = Number(localStorage.getItem('goalRider_idx')) || 0;
         let allData = JSON.parse(localStorage.getItem('goalRider_cache')) || {};
-        let currentView = 'month', referenceDate = new Date(), myChart, myExpChart, myHourlyChart, map, currentPosMarker, editTargetId = null, allSpots = {}, mapMarkers = {};
-        let mapType = 'hybrid', baseLayer, hybridLayer;
-        let selectedWeather = "";
+        let currentView = 'month', referenceDate = new Date(), myChart, myExpChart, myHourlyChart, map, selectedWeather = "";
 
         window.onload = () => {
             document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
-            switchRider(currentRiderIdx); fetchCloudSales();
+            switchRider(currentRiderIdx);
+            fetchCloudSales();
         };
+
+        function setWeather(w) {
+            selectedWeather = w;
+            document.querySelectorAll('.weather-btn').forEach(b => {
+                b.classList.remove('active');
+                if(b.getAttribute('data-w') === w) b.classList.add('active');
+            });
+        }
 
         function showPage(page) {
             document.querySelectorAll('.content-area, .tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(page === 'sales' ? 'pageSales' : 'pageMap').classList.add('active');
             document.getElementById(page === 'sales' ? 'tabSales' : 'tabMap').classList.add('active');
-            if(page === 'map') { if(!map) initMap(); else setTimeout(() => { map.invalidateSize(); }, 300); }
+            if(page === 'map' && !map) initMap();
+        }
+
+        function initMap() {
+            map = L.map('map', { zoomControl: false }).setView([35.7289, 139.7104], 15);
+            L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}').addTo(map);
         }
 
         async function fetchCloudSales() { try { const res = await fetch(DB_SALES); const cloud = await res.json(); if (cloud) { allData = cloud; renderApp(); } } catch (e) {} }
 
         function renderApp() {
             const name = RIDERS[currentRiderIdx]; if (!allData[name]) allData[name] = { sales: {}, goals: {} };
-            const data = allData[name]; let labels = [], chartSales = [], chartExp = [], chartHourly = [], chartNetHourly = [], tSales = 0, tExp = 0, tHours = 0;
+            const data = allData[name]; let labels = [], chartSales = [], chartExp = [], chartHourly = [], tSales = 0, tExp = 0, tHours = 0;
             const y = referenceDate.getFullYear(), m = referenceDate.getMonth();
-            const monthKey = `${y}-${String(m+1).padStart(2,'0')}`;
-            const currentGoal = data.goals ? (data.goals[monthKey] || DEFAULT_GOAL) : DEFAULT_GOAL;
-
-            const days = currentView === 'month' ? new Date(y, m + 1, 0).getDate() : 7;
-            document.getElementById('periodLabel').innerText = currentView === 'month' ? `${y}年${m + 1}月` : "週間表示";
-
-            if (currentView === 'month') {
-                for (let i = 1; i <= days; i++) {
-                    let key = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                    labels.push(i); const s = data.sales[key] || {};
-                    const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
-                    chartSales.push(ds); chartExp.push(de); chartHourly.push(dh > 0 ? Math.round(ds/dh) : 0); chartNetHourly.push(dh > 0 ? Math.round((ds-de)/dh) : 0);
-                    tSales += ds; tExp += de; tHours += dh;
-                }
-                const today = new Date();
-                let dailyReqStr = "---";
-                if (today.getFullYear() === y && today.getMonth() === m) {
-                    const todayKey = today.toISOString().split('T')[0];
-                    const todayDone = (data.sales[todayKey] && (data.sales[todayKey].hours || data.sales[todayKey].uber));
-                    let remainingDays = days - today.getDate() + (todayDone ? 0 : 1);
-                    const remainingAmount = currentGoal - tSales;
-                    if (remainingAmount <= 0) dailyReqStr = "達成！";
-                    else dailyReqStr = remainingDays > 0 ? Math.ceil(remainingAmount / remainingDays).toLocaleString() + "円" : "最終日終了";
-                    document.getElementById('dailyRequiredLabel').innerText = todayDone ? "1日必要額 (明日から)" : "1日必要額 (今日込)";
-                }
-                document.getElementById('dailyRequired').innerText = dailyReqStr;
-            } else {
-                const tempDate = new Date(referenceDate); const day = tempDate.getDay(); const diff = (day === 0 ? -6 : 1 - day); 
-                const mon = new Date(tempDate.setDate(tempDate.getDate() + diff));
-                const sun = new Date(new Date(mon).setDate(mon.getDate() + 6));
-                document.getElementById('periodLabel').innerText = `${mon.getMonth()+1}/${mon.getDate()}〜${sun.getMonth()+1}/${sun.getDate()}`;
-                for (let i = 0; i < 7; i++) {
-                    let d = new Date(mon); d.setDate(d.getDate() + i); let key = d.toISOString().split('T')[0]; labels.push(['月','火','水','木','金','土','日'][i]);
-                    const s = data.sales[key] || {}; const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
-                    chartSales.push(ds); chartExp.push(de); chartHourly.push(dh > 0 ? Math.round(ds/dh) : 0); chartNetHourly.push(dh > 0 ? Math.round((ds-de)/dh) : 0);
-                    tSales += ds; tExp += de; tHours += dh;
-                }
+            const last = new Date(y, m + 1, 0).getDate();
+            document.getElementById('periodLabel').innerText = `${y}年${m + 1}月`;
+            for (let i = 1; i <= last; i++) {
+                let key = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                labels.push(i); const s = data.sales[key] || {};
+                const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
+                chartSales.push(ds); chartExp.push(de); chartHourly.push(dh > 0 ? Math.round((ds-de)/dh) : 0);
+                tSales += ds; tExp += de; tHours += dh;
             }
             document.getElementById('totalSales').innerText = tSales.toLocaleString() + "円";
             document.getElementById('totalExpense').innerText = tExp.toLocaleString() + "円";
-            document.getElementById('displayGoal').innerText = currentGoal.toLocaleString();
-            document.getElementById('displayRemaining').innerText = Math.max(0, currentGoal - tSales).toLocaleString() + "円";
-            document.getElementById('avgHourly').innerText = tHours > 0 ? Math.round(tSales/tHours).toLocaleString() + "円" : "0円";
+            const monthKey = `${y}-${String(m+1).padStart(2,'0')}`;
+            const goal = data.goals ? (data.goals[monthKey] || 300000) : 300000;
+            document.getElementById('displayGoal').innerText = goal.toLocaleString();
+            document.getElementById('displayRemaining').innerText = Math.max(0, goal - tSales).toLocaleString() + "円";
             document.getElementById('netHourly').innerText = tHours > 0 ? Math.round((tSales-tExp)/tHours).toLocaleString() + "円" : "0円";
             
-            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { beginAtZero: true, ticks: { font: { size: 8 } } }, x: { ticks: { font: { size: 8 } } } } };
+            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { beginAtZero: true, ticks: { font: { size: 8 } } }, x: { ticks: { font: { size: 7 } } } } };
             if (myChart) myChart.destroy(); myChart = new Chart(document.getElementById('salesChart'), { type: 'bar', data: { labels, datasets: [{ data: chartSales, backgroundColor: '#3498db' }] }, options: opt });
             if (myExpChart) myExpChart.destroy(); myExpChart = new Chart(document.getElementById('expenseChart'), { type: 'bar', data: { labels, datasets: [{ data: chartExp, backgroundColor: '#e06287' }] }, options: opt });
-            if (myHourlyChart) myHourlyChart.destroy(); myHourlyChart = new Chart(document.getElementById('hourlyChart'), { type: 'line', data: { labels, datasets: [{ data: chartHourly, borderColor: '#f39c12', tension: 0.3 }, { data: chartNetHourly, borderColor: '#2ecc71', tension: 0.3 }]}, options: opt });
-        }
-
-        function initMap() {
-            map = L.map('map', { zoomControl: false, maxZoom: 19 }).setView([35.7289, 139.7104], 15);
-            baseLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
-            hybridLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 20 });
-            hybridLayer.addTo(map);
-            map.on('contextmenu', e => openSpotModal(e.latlng.lat, e.latlng.lng));
-            startLocationWatch(); loadAllSpots();
-        }
-
-        function toggleMapType() {
-            if (mapType === 'hybrid') { map.removeLayer(hybridLayer); baseLayer.addTo(map); mapType = 'normal'; document.getElementById('layerBtn').innerText = "🛰️"; }
-            else { map.removeLayer(baseLayer); hybridLayer.addTo(map); mapType = 'hybrid'; document.getElementById('layerBtn').innerText = "🗺️"; }
-        }
-
-        async function searchAddress() {
-            const q = document.getElementById('addrSearch').value; if(!q) return;
-            try { const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=jp&limit=1`); const data = await res.json(); if(data && data[0]) map.flyTo([data[0].lat, data[0].lon], 18); } catch(e){}
-        }
-
-        function setWeather(w) {
-            selectedWeather = w;
-            const btns = document.querySelectorAll('.weather-btn');
-            btns.forEach(b => {
-                b.classList.remove('active');
-                if (b.title === w) b.classList.add('active');
-            });
-        }
-
-        function showInputRule() {
-            alert("【インプットのルール】\n雨か晴れかの判定は、1時間以上雨が降っていたら雨（大・通常・小）を選んでください。\n1時間以内の場合は、雨は選択せず、曇りもしくは晴れを選んでください。");
+            if (myHourlyChart) myHourlyChart.destroy(); myHourlyChart = new Chart(document.getElementById('hourlyChart'), { type: 'line', data: { labels, datasets: [{ data: chartHourly, borderColor: '#2ecc71', tension: 0.3 }]}, options: opt });
         }
 
         async function saveSales() { 
             const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value; if(!allData[n]) allData[n] = { sales: {}, goals: {} };
             allData[n].sales[dk] = { 
-                hours: Number(document.getElementById('inputHours').value), 
-                gas: Number(document.getElementById('inputGas').value), 
-                otherExp: Number(document.getElementById('inputOtherExp').value), 
-                uber: Number(document.getElementById('inputUber').value), 
-                demae: Number(document.getElementById('inputDemae').value), 
-                menu: Number(document.getElementById('inputMenu').value), 
-                rocket: Number(document.getElementById('inputRocket').value),
+                hours: Number(document.getElementById('inputHours').value), gas: Number(document.getElementById('inputGas').value), otherExp: Number(document.getElementById('inputOtherExp').value),
+                uber: Number(document.getElementById('inputUber').value), demae: Number(document.getElementById('inputDemae').value), menu: Number(document.getElementById('inputMenu').value), rocket: Number(document.getElementById('inputRocket').value),
                 weather: selectedWeather 
             }; 
             renderApp(); await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); closeInputModal();
@@ -316,40 +222,15 @@
             setWeather(d.weather || "");
         }
 
-        // --- 以下、既存のマップ分析・地点登録系 ---
-        function analyzeMap() {
-            const nowDay = new Date().getDay(), nowHour = new Date().getHours();
-            Object.keys(allSpots).forEach(id => {
-                const s = allSpots[id]; const isRel = (s.day === nowDay && Math.abs(s.hour - nowHour) <= 2);
-                if (mapMarkers[id]) { mapMarkers[id].setRadius(isRel ? 18 : 8); mapMarkers[id].setStyle({ weight: isRel ? 5 : 2, color: isRel ? '#000' : '#fff' }); }
-            });
-            alert("現在の状況に近いデータを強調しました！");
-        }
-        function openSpotList() {
-            const listDiv = document.getElementById('spotList'); listDiv.innerHTML = "";
-            Object.keys(allSpots).reverse().forEach(id => {
-                const s = allSpots[id]; const item = document.createElement('div');
-                item.style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; cursor:pointer;";
-                item.onclick = () => { document.getElementById('listModal').style.display='none'; map.flyTo([s.lat, s.lng], 18); setTimeout(() => openSpotModal(s.lat, s.lng, id), 1600); };
-                item.innerHTML = `<div><b>${s.mainCat}(${s.subCat})</b><br><small>${s.rider} / ${s.time}</small></div><div style="color:#3498db;">🔍</div>`;
-                listDiv.appendChild(item);
-            });
-            document.getElementById('listModal').style.display = 'block';
-        }
-        function startLocationWatch() { navigator.geolocation.watchPosition(p => { const pos = [p.coords.latitude, p.coords.longitude]; if (!currentPosMarker) { currentPosMarker = L.circleMarker(pos, { radius: 8, fillColor: "#3498db", color: "#fff", weight: 3, fillOpacity: 1 }).addTo(map); map.setView(pos, 16); } else currentPosMarker.setLatLng(pos); window.latestPos = pos; }, null, { enableHighAccuracy: true }); }
-        function goToCurrentLocation() { if (window.latestPos) map.flyTo(window.latestPos, 17); }
-        function updateSubCat() { const m = document.getElementById('mainCat').value, s = document.getElementById('subCat'), g = document.getElementById('subCatGroup'), l = document.getElementById('subCatLabel'); s.innerHTML = ""; if (m === "待機") { l.innerText = "鳴りやすさ"; s.innerHTML = '<option value="鳴る">鳴るエリア</option><option value="鳴らない">鳴らないエリア</option>'; g.style.display = "block"; } else if (m === "ピック" || m === "ドロップ") { l.innerText = "評価"; s.innerHTML = '<option value="最高">最高</option><option value="普通">普通</option><option value="最低">最低</option>'; g.style.display = "block"; } else g.style.display = "none"; }
-        function openSpotModal(lat, lng, id = null) { editTargetId = id; document.getElementById('spotModal').style.display = 'block'; document.getElementById('deleteBtn').style.display = id ? 'block' : 'none'; if (id) { const s = allSpots[id]; document.getElementById('mainCat').value = s.mainCat; updateSubCat(); document.getElementById('subCat').value = s.subCat; document.getElementById('spotComment').value = s.comment || ""; document.getElementById('spotInfo').innerText = `記録者: ${s.rider} / 日時: ${s.time}`; window.tempLat = s.lat; window.tempLng = s.lng; } else { document.getElementById('mainCat').value = ""; document.getElementById('subCatGroup').style.display = "none"; document.getElementById('spotComment').value = ""; document.getElementById('spotInfo').innerText = `新規登録: ${RIDERS[currentRiderIdx]}`; window.tempLat = lat; window.tempLng = lng; } }
-        function closeSpotModal() { document.getElementById('spotModal').style.display = 'none'; }
-        async function saveSpot() { const spot = { lat: window.tempLat, lng: window.tempLng, mainCat: document.getElementById('mainCat').value, subCat: document.getElementById('subCat').value, comment: document.getElementById('spotComment').value, rider: RIDERS[currentRiderIdx], time: new Date().toLocaleString(), day: new Date().getDay(), hour: new Date().getHours() }; await fetch(editTargetId ? `${DB_MAP.replace('.json', `/${editTargetId}.json`)}` : DB_MAP, { method: editTargetId?'PUT':'POST', body: JSON.stringify(spot) }); closeSpotModal(); loadAllSpots(); }
-        async function deleteSpot() { if(!confirm("削除しますか？")) return; await fetch(`${DB_MAP.replace('.json', `/${editTargetId}.json`)}`, { method: 'DELETE' }); closeSpotModal(); loadAllSpots(); }
-        async function loadAllSpots() { const res = await fetch(DB_MAP); allSpots = await res.json() || {}; Object.values(mapMarkers).forEach(m => map.removeLayer(m)); mapMarkers = {}; Object.keys(allSpots).forEach(id => { const s = allSpots[id]; let color = (s.subCat === "最高" || s.subCat === "鳴る") ? "#2ecc71" : (s.subCat === "最低" || s.subCat === "鳴らない") ? "#e74c3c" : "#f1c40f"; const m = L.circleMarker([s.lat, s.lng], { radius: 10, fillColor: color, color: "#fff", weight: 2, fillOpacity: 0.8 }).addTo(map); if (s.comment) m.bindTooltip(s.comment, { permanent: true, direction: 'right', className: 'leaflet-tooltip-own' }).openTooltip(); m.on('click', () => openSpotModal(s.lat, s.lng, id)); mapMarkers[id] = m; }); }
         function switchRider(idx) { currentRiderIdx = idx; localStorage.setItem('goalRider_idx', idx); document.querySelectorAll('.rider-btn').forEach((b, i) => b.className = i === idx ? 'rider-btn rider-active' : 'rider-btn'); document.getElementById('riderDisplayName').innerText = RIDERS[idx]; renderApp(); }
         function switchView(v) { currentView = v; document.getElementById('btnWeek').className = v === 'week' ? 'view-btn active-view' : 'view-btn'; document.getElementById('btnMonth').className = v === 'month' ? 'view-btn active-view' : 'view-btn'; renderApp(); }
         function openInputModal() { document.getElementById('inputModal').style.display='block'; loadExistingData(); }
         function closeInputModal() { document.getElementById('inputModal').style.display='none'; }
-        function navigatePeriod(dir) { if (currentView === 'month') referenceDate.setMonth(referenceDate.getMonth() + dir); else referenceDate.setDate(referenceDate.getDate() + (dir * 7)); renderApp(); }
-        async function setGoal() { const n = RIDERS[currentRiderIdx], y = referenceDate.getFullYear(), m = referenceDate.getMonth(), mk = `${y}-${String(m+1).padStart(2,'0')}`; const v = prompt(`${y}年${m+1}月の目標額`, allData[n].goals ? (allData[n].goals[mk] || DEFAULT_GOAL) : DEFAULT_GOAL); if(v !== null) { if(!allData[n].goals) allData[n].goals = {}; allData[n].goals[mk] = Number(v); renderApp(); await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); } }
+        function navigatePeriod(dir) { referenceDate.setMonth(referenceDate.getMonth() + dir); renderApp(); }
+        async function setGoal() { 
+            const n = RIDERS[currentRiderIdx], y = referenceDate.getFullYear(), m = referenceDate.getMonth(), mk = `${y}-${String(m+1).padStart(2,'0')}`;
+            const v = prompt(`${y}年${m+1}月の目標`, allData[n].goals ? (allData[n].goals[mk] || 300000) : 300000); if(v) { if(!allData[n].goals) allData[n].goals = {}; allData[n].goals[mk] = Number(v); renderApp(); await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); }
+        }
     </script>
 </body>
 </html>
