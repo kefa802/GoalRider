@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Biz - V1.02.1</title>
+    <title>Goal Rider Biz - V1.02.2</title>
 
     <link rel="icon" href="https://img.icons8.com/clouds/256/delivery-man.png" type="image/png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/clouds/256/delivery-man.png">
@@ -77,7 +77,7 @@
         <button id="tabMap" class="tab-btn" onclick="showPage('map')">マップ</button>
     </div>
     
-    <div class="version-bar">GoalRider V1.02.1</div>
+    <div class="version-bar">GoalRider V1.02.2</div>
 
     <div id="pageSales" class="content-area active">
         <div class="rider-selector">
@@ -98,7 +98,7 @@
                 <div><div class="stats-label">売上合計</div><div class="stats-val" id="totalSales">0円</div></div>
                 <div><div class="stats-label" style="color:#e74c3c;">目標まで</div><div class="stats-val" id="displayRemaining" style="color:#e74c3c;">0円</div></div>
                 <div><div class="stats-label" id="dailyRequiredLabel">1日必要額 (今日込)</div><div class="stats-val" style="color:#9b59b6;" id="dailyRequired">0円</div></div>
-                <div><div class="stats-label">経費合計</div><div class="stats-val" id="totalExpense">0円</div></div>
+                <div><div class="stats-label">経費合計</div><div class="stats-val" style="color:#e67e22;" id="totalExpense">0円</div></div>
                 <div><div class="stats-label">売上時給</div><div class="stats-val" id="avgHourly">0円</div></div>
                 <div><div class="stats-label">実質時給</div><div class="stats-val" style="color:#2ecc71;" id="netHourly">0円</div></div>
             </div>
@@ -219,36 +219,57 @@
             const name = RIDERS[currentRiderIdx]; if (!allData[name]) allData[name] = { sales: {}, goals: {} };
             const data = allData[name]; let labels = [], chartSales = [], chartExp = [], chartHourly = [], tSales = 0, tExp = 0, tHours = 0;
             const y = referenceDate.getFullYear(), m = referenceDate.getMonth();
-            const last = new Date(y, m + 1, 0).getDate();
-            document.getElementById('periodLabel').innerText = `${y}年${m + 1}月`;
-            for (let i = 1; i <= last; i++) {
-                let key = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                labels.push(i); const s = data.sales[key] || {};
-                const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
-                chartSales.push(ds); chartExp.push(de); chartHourly.push(dh > 0 ? Math.round((ds)/dh) : 0);
-                tSales += ds; tExp += de; tHours += dh;
-            }
-            document.getElementById('totalSales').innerText = tSales.toLocaleString() + "円";
-            document.getElementById('totalExpense').innerText = tExp.toLocaleString() + "円";
             const monthKey = `${y}-${String(m+1).padStart(2,'0')}`;
             const goal = data.goals ? (data.goals[monthKey] || DEFAULT_GOAL) : DEFAULT_GOAL;
+
+            if (currentView === 'month') {
+                const last = new Date(y, m + 1, 0).getDate();
+                document.getElementById('periodLabel').innerText = `${y}年${m + 1}月`;
+                for (let i = 1; i <= last; i++) {
+                    let key = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                    labels.push(i); const s = data.sales[key] || {};
+                    const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
+                    chartSales.push(ds); chartExp.push(de); chartHourly.push(dh > 0 ? Math.round(ds/dh) : 0);
+                    tSales += ds; tExp += de; tHours += dh;
+                }
+                const today = new Date();
+                let dailyReqStr = "---";
+                if (today.getFullYear() === y && today.getMonth() === m) {
+                    const todayKey = today.toISOString().split('T')[0];
+                    const todayDone = (data.sales[todayKey] && (data.sales[todayKey].hours || data.sales[todayKey].uber));
+                    let remainingDays = last - today.getDate() + (todayDone ? 0 : 1);
+                    const remainingAmount = goal - tSales;
+                    if (remainingAmount <= 0) dailyReqStr = "達成！";
+                    else dailyReqStr = remainingDays > 0 ? Math.ceil(remainingAmount / remainingDays).toLocaleString() + "円" : "最終日終了";
+                    document.getElementById('dailyRequiredLabel').innerText = todayDone ? "1日必要額 (明日から)" : "1日必要額 (今日込)";
+                }
+                document.getElementById('dailyRequired').innerText = dailyReqStr;
+            } else {
+                // 週間表示ロジック
+                const tempDate = new Date(referenceDate);
+                const day = tempDate.getDay();
+                const diff = (day === 0 ? -6 : 1 - day); 
+                const mon = new Date(tempDate.setDate(tempDate.getDate() + diff));
+                const sun = new Date(new Date(mon).setDate(mon.getDate() + 6));
+                document.getElementById('periodLabel').innerText = `${mon.getMonth()+1}/${mon.getDate()}〜${sun.getMonth()+1}/${sun.getDate()}`;
+                for (let i = 0; i < 7; i++) {
+                    let d = new Date(mon); d.setDate(d.getDate() + i);
+                    let key = d.toISOString().split('T')[0];
+                    labels.push(['月','火','水','木','金','土','日'][i]);
+                    const s = data.sales[key] || {};
+                    const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0), de = (s.gas||0)+(s.otherExp||0), dh = s.hours || 0;
+                    chartSales.push(ds); chartExp.push(de); chartHourly.push(dh > 0 ? Math.round(ds/dh) : 0);
+                    tSales += ds; tExp += de; tHours += dh;
+                }
+                document.getElementById('dailyRequired').innerText = "月間のみ表示";
+            }
+
+            document.getElementById('totalSales').innerText = tSales.toLocaleString() + "円";
+            document.getElementById('totalExpense').innerText = tExp.toLocaleString() + "円";
             document.getElementById('displayGoal').innerText = goal.toLocaleString();
             document.getElementById('displayRemaining').innerText = Math.max(0, goal - tSales).toLocaleString() + "円";
             document.getElementById('avgHourly').innerText = tHours > 0 ? Math.round(tSales/tHours).toLocaleString() + "円" : "0円";
             document.getElementById('netHourly').innerText = tHours > 0 ? Math.round((tSales-tExp)/tHours).toLocaleString() + "円" : "0円";
-
-            const today = new Date();
-            let dailyReqStr = "---";
-            if (today.getFullYear() === y && today.getMonth() === m) {
-                const todayKey = today.toISOString().split('T')[0];
-                const todayDone = (data.sales[todayKey] && (data.sales[todayKey].hours || data.sales[todayKey].uber));
-                let remainingDays = last - today.getDate() + (todayDone ? 0 : 1);
-                const remainingAmount = goal - tSales;
-                if (remainingAmount <= 0) dailyReqStr = "達成！";
-                else dailyReqStr = remainingDays > 0 ? Math.ceil(remainingAmount / remainingDays).toLocaleString() + "円" : "最終日終了";
-                document.getElementById('dailyRequiredLabel').innerText = todayDone ? "1日必要額 (明日から)" : "1日必要額 (今日込)";
-            }
-            document.getElementById('dailyRequired').innerText = dailyReqStr;
 
             const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { beginAtZero: true, ticks: { font: { size: 8 } } }, x: { ticks: { font: { size: 7 } } } } };
             if (myChart) myChart.destroy(); myChart = new Chart(document.getElementById('salesChart'), { type: 'bar', data: { labels, datasets: [{ data: chartSales, backgroundColor: '#3498db' }] }, options: opt });
@@ -256,40 +277,33 @@
             if (myHourlyChart) myHourlyChart.destroy(); myHourlyChart = new Chart(document.getElementById('hourlyChart'), { type: 'line', data: { labels, datasets: [{ data: chartHourly, borderColor: '#f39c12', tension: 0.3 }]}, options: opt });
         }
 
-        // 分析機能：売上ベースの時給に修正
         function openAnalysisModal() {
             const name = RIDERS[currentRiderIdx];
-            const salesData = allData[name].sales || {};
+            const salesData = (allData[name] && allData[name].sales) ? allData[name].sales : {};
             const daySum = { 0:[], 1:[], 2:[], 3:[], 4:[], 5:[], 6:[] };
             const weatherSum = { "大雨":[], "雨":[], "小雨":[], "曇り":[], "晴れ":[] };
-
             Object.keys(salesData).forEach(dateStr => {
                 const s = salesData[dateStr];
                 const dh = s.hours || 0;
                 if (dh > 0) {
                     const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0);
-                    const salesHourly = ds / dh; // 売上ベースの時給
+                    const salesHourly = ds / dh;
                     const day = new Date(dateStr).getDay();
                     daySum[day].push(salesHourly);
                     if (s.weather && weatherSum[s.weather] !== undefined) weatherSum[s.weather].push(salesHourly);
                 }
             });
-
             const dayAvg = [1,2,3,4,5,6,0].map(d => daySum[d].length ? Math.round(daySum[d].reduce((a,b)=>a+b)/daySum[d].length) : 0);
             const weatherAvg = ["大雨","雨","小雨","曇り","晴れ"].map(w => weatherSum[w].length ? Math.round(weatherSum[w].reduce((a,b)=>a+b)/weatherSum[w].length) : 0);
-
             document.getElementById('analysisModal').style.display = 'block';
             const chartOpt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { beginAtZero: true } } };
-            
             if (dayAnalysisChart) dayAnalysisChart.destroy();
             dayAnalysisChart = new Chart(document.getElementById('dayAnalysisChart'), { type: 'bar', data: { labels: ['月','火','水','木','金','土','日'], datasets: [{ data: dayAvg, backgroundColor: '#3498db' }] }, options: chartOpt });
-            
             if (weatherAnalysisChart) weatherAnalysisChart.destroy();
             weatherAnalysisChart = new Chart(document.getElementById('weatherAnalysisChart'), { type: 'bar', data: { labels: ['大雨','雨','小雨','曇','晴'], datasets: [{ data: weatherAvg, backgroundColor: ['#6c5ce7','#0984e3','#00cec9','#636e72','#f39c12'] }] }, options: chartOpt });
         }
         function closeAnalysisModal() { document.getElementById('analysisModal').style.display = 'none'; }
 
-        // --- 以下、既存のマップ機能系 ---
         function toggleMapType() { if (mapType === 'hybrid') { map.removeLayer(hybridLayer); baseLayer.addTo(map); mapType = 'normal'; document.getElementById('layerBtn').innerText = "🛰️"; } else { map.removeLayer(baseLayer); hybridLayer.addTo(map); mapType = 'hybrid'; document.getElementById('layerBtn').innerText = "🗺️"; } }
         async function searchAddress() { const q = document.getElementById('addrSearch').value; if(!q) return; try { const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=jp&limit=1`); const data = await res.json(); if(data && data[0]) map.flyTo([data[0].lat, data[0].lon], 18); } catch(e){} }
         function analyzeMap() { const nowDay = new Date().getDay(), nowHour = new Date().getHours(); Object.keys(allSpots).forEach(id => { const s = allSpots[id]; const isRel = (s.day === nowDay && Math.abs(s.hour - nowHour) <= 2); if (mapMarkers[id]) { mapMarkers[id].setRadius(isRel ? 18 : 8); mapMarkers[id].setStyle({ weight: isRel ? 5 : 2, color: isRel ? '#000' : '#fff' }); } }); alert("分析完了！"); }
@@ -309,8 +323,8 @@
         function switchView(v) { currentView = v; document.getElementById('btnWeek').className = v === 'week' ? 'view-btn active-view' : 'view-btn'; document.getElementById('btnMonth').className = v === 'month' ? 'view-btn active-view' : 'view-btn'; renderApp(); }
         function openInputModal() { document.getElementById('inputModal').style.display='block'; loadExistingData(); }
         function closeInputModal() { document.getElementById('inputModal').style.display='none'; }
-        function navigatePeriod(dir) { referenceDate.setMonth(referenceDate.getMonth() + dir); renderApp(); }
-        async function setGoal() { const n = RIDERS[currentRiderIdx], y = referenceDate.getFullYear(), m = referenceDate.getMonth(), mk = `${y}-${String(m+1).padStart(2,'0')}`; const v = prompt(`${y}年${m+1}月の目標`, allData[n].goals ? (allData[n].goals[mk] || 300000) : 300000); if(v) { if(!allData[n].goals) allData[n].goals = {}; allData[n].goals[mk] = Number(v); renderApp(); await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); } }
+        function navigatePeriod(dir) { if (currentView === 'month') referenceDate.setMonth(referenceDate.getMonth() + dir); else referenceDate.setDate(referenceDate.getDate() + (dir * 7)); renderApp(); }
+        async function setGoal() { const n = RIDERS[currentRiderIdx], y = referenceDate.getFullYear(), m = referenceDate.getMonth(), mk = `${y}-${String(m+1).padStart(2,'0')}`; const v = prompt(`${y}年${m+1}月の目標`, (allData[n].goals ? (allData[n].goals[mk] || 300000) : 300000)); if(v) { if(!allData[n].goals) allData[n].goals = {}; allData[n].goals[mk] = Number(v); renderApp(); await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); } }
     </script>
 </body>
 </html>
