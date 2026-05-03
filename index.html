@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Biz - V1.02</title>
+    <title>Goal Rider Biz - V1.02.1</title>
 
     <link rel="icon" href="https://img.icons8.com/clouds/256/delivery-man.png" type="image/png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/clouds/256/delivery-man.png">
@@ -39,12 +39,10 @@
 
         .chart-container { height: 85px; position: relative; margin-bottom: 2px; }
         
-        /* メイン画面：実績入力と分析ボタン */
         .action-button-row { display: flex; gap: 6px; padding: 4px 0; }
         .btn-main-entry { flex: 3; background: #2ecc71; color: white; border: none; padding: 12px; font-size: 1.0em; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .btn-analyze-trigger { flex: 1; background: #95a5a6; color: white; border: none; padding: 12px; font-size: 0.85em; border-radius: 10px; cursor: pointer; font-weight: bold; }
 
-        /* モーダル内ボタン（フルサイズ） */
         .btn-modal-primary { width: 100%; background: #2ecc71; color: white; border: none; padding: 12px; font-size: 1.0em; border-radius: 10px; cursor: pointer; font-weight: bold; }
 
         #map { width: 100%; height: 100%; border-radius: 10px; z-index: 1; background: #eee; }
@@ -79,7 +77,7 @@
         <button id="tabMap" class="tab-btn" onclick="showPage('map')">マップ</button>
     </div>
     
-    <div class="version-bar">GoalRider V1.02</div>
+    <div class="version-bar">GoalRider V1.02.1</div>
 
     <div id="pageSales" class="content-area active">
         <div class="rider-selector">
@@ -163,10 +161,10 @@
 
     <div id="analysisModal" class="modal">
         <div class="modal-content">
-            <h3 style="margin: 0 0 15px 0;">稼働効率分析 (実質時給)</h3>
-            <div class="stats-label" style="margin-bottom: 5px;">曜日別 平均時給</div>
+            <h3 style="margin: 0 0 15px 0;">稼働効率分析 (売上時給)</h3>
+            <div class="stats-label" style="margin-bottom: 5px;">曜日別 平均売上時給</div>
             <div class="analysis-chart-box"><canvas id="dayAnalysisChart"></canvas></div>
-            <div class="stats-label" style="margin-bottom: 5px;">天気別 平均時給</div>
+            <div class="stats-label" style="margin-bottom: 5px;">天気別 平均売上時給</div>
             <div class="analysis-chart-box"><canvas id="weatherAnalysisChart"></canvas></div>
             <button class="btn-modal-primary" onclick="closeAnalysisModal()">閉じる</button>
         </div>
@@ -258,34 +256,40 @@
             if (myHourlyChart) myHourlyChart.destroy(); myHourlyChart = new Chart(document.getElementById('hourlyChart'), { type: 'line', data: { labels, datasets: [{ data: chartHourly, borderColor: '#f39c12', tension: 0.3 }]}, options: opt });
         }
 
+        // 分析機能：売上ベースの時給に修正
         function openAnalysisModal() {
             const name = RIDERS[currentRiderIdx];
             const salesData = allData[name].sales || {};
             const daySum = { 0:[], 1:[], 2:[], 3:[], 4:[], 5:[], 6:[] };
             const weatherSum = { "大雨":[], "雨":[], "小雨":[], "曇り":[], "晴れ":[] };
+
             Object.keys(salesData).forEach(dateStr => {
                 const s = salesData[dateStr];
                 const dh = s.hours || 0;
                 if (dh > 0) {
                     const ds = (s.uber||0)+(s.demae||0)+(s.menu||0)+(s.rocket||0);
-                    const de = (s.gas||0)+(s.otherExp||0);
-                    const netHourly = (ds - de) / dh;
+                    const salesHourly = ds / dh; // 売上ベースの時給
                     const day = new Date(dateStr).getDay();
-                    daySum[day].push(netHourly);
-                    if (s.weather && weatherSum[s.weather] !== undefined) weatherSum[s.weather].push(netHourly);
+                    daySum[day].push(salesHourly);
+                    if (s.weather && weatherSum[s.weather] !== undefined) weatherSum[s.weather].push(salesHourly);
                 }
             });
+
             const dayAvg = [1,2,3,4,5,6,0].map(d => daySum[d].length ? Math.round(daySum[d].reduce((a,b)=>a+b)/daySum[d].length) : 0);
             const weatherAvg = ["大雨","雨","小雨","曇り","晴れ"].map(w => weatherSum[w].length ? Math.round(weatherSum[w].reduce((a,b)=>a+b)/weatherSum[w].length) : 0);
+
             document.getElementById('analysisModal').style.display = 'block';
             const chartOpt = { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { beginAtZero: true } } };
+            
             if (dayAnalysisChart) dayAnalysisChart.destroy();
             dayAnalysisChart = new Chart(document.getElementById('dayAnalysisChart'), { type: 'bar', data: { labels: ['月','火','水','木','金','土','日'], datasets: [{ data: dayAvg, backgroundColor: '#3498db' }] }, options: chartOpt });
+            
             if (weatherAnalysisChart) weatherAnalysisChart.destroy();
             weatherAnalysisChart = new Chart(document.getElementById('weatherAnalysisChart'), { type: 'bar', data: { labels: ['大雨','雨','小雨','曇','晴'], datasets: [{ data: weatherAvg, backgroundColor: ['#6c5ce7','#0984e3','#00cec9','#636e72','#f39c12'] }] }, options: chartOpt });
         }
         function closeAnalysisModal() { document.getElementById('analysisModal').style.display = 'none'; }
 
+        // --- 以下、既存のマップ機能系 ---
         function toggleMapType() { if (mapType === 'hybrid') { map.removeLayer(hybridLayer); baseLayer.addTo(map); mapType = 'normal'; document.getElementById('layerBtn').innerText = "🛰️"; } else { map.removeLayer(baseLayer); hybridLayer.addTo(map); mapType = 'hybrid'; document.getElementById('layerBtn').innerText = "🗺️"; } }
         async function searchAddress() { const q = document.getElementById('addrSearch').value; if(!q) return; try { const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=jp&limit=1`); const data = await res.json(); if(data && data[0]) map.flyTo([data[0].lat, data[0].lon], 18); } catch(e){} }
         function analyzeMap() { const nowDay = new Date().getDay(), nowHour = new Date().getHours(); Object.keys(allSpots).forEach(id => { const s = allSpots[id]; const isRel = (s.day === nowDay && Math.abs(s.hour - nowHour) <= 2); if (mapMarkers[id]) { mapMarkers[id].setRadius(isRel ? 18 : 8); mapMarkers[id].setStyle({ weight: isRel ? 5 : 2, color: isRel ? '#000' : '#fff' }); } }); alert("分析完了！"); }
@@ -310,4 +314,3 @@
     </script>
 </body>
 </html>
-
