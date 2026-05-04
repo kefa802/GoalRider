@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Biz - V1.03.1</title>
+    <title>Goal Rider Biz - V1.03.2</title>
 
     <link rel="icon" href="https://img.icons8.com/clouds/256/delivery-man.png" type="image/png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/clouds/256/delivery-man.png">
@@ -93,7 +93,7 @@
         <button id="tabMap" class="tab-btn" onclick="showPage('map')">マップ</button>
     </div>
     
-    <div class="version-bar">GoalRider V1.03.1</div>
+    <div class="version-bar">GoalRider V1.03.2</div>
 
     <div id="pageSales" class="content-area active">
         <div class="rider-selector">
@@ -137,7 +137,7 @@
     <div id="pageMap" class="content-area" style="position: relative; padding:0;">
         <div id="map" style="width:100%; height:100%;"></div>
         <div class="map-ui">
-            <button class="ui-btn" style="background:#fff; color:#2c3e50; font-size:1.5em; border:2px solid #2c3e50;" onclick="toggleMapType()" id="layerBtn">🗺️</button>
+            <button class="ui-btn" style="background:#fff; color:#2c3e50; font-size:1.5em; border:2px solid #2c3e50;" onclick="toggleMapType()" id="layerBtn">🛰️</button>
             <button class="ui-btn" style="background:white; color:#3498db; border:2px solid #3498db; font-size:1.6em;" onclick="goToCurrentLocation()">🎯</button>
             <button class="ui-btn" style="background:#f1c40f; color:black; font-weight:bold; font-size:0.7em;" onclick="analyzeMap()">分析</button>
             <button class="ui-btn" style="background:#34495e; color:white; font-size:0.7em; font-weight:bold;" onclick="openSpotList()">リスト</button>
@@ -210,7 +210,7 @@
         let currentRiderIdx = Number(localStorage.getItem('goalRider_idx')) || 0;
         let allData = JSON.parse(localStorage.getItem('goalRider_cache')) || {};
         let currentView = 'month', referenceDate = new Date(), myChart, myExpChart, myHourlyChart, map, currentPosMarker, editTargetId = null, allSpots = {}, mapMarkers = {};
-        let mapType = 'hybrid', baseLayer, hybridLayer, selectedWeather = "";
+        let mapType = 'normal', baseLayer, hybridLayer, selectedWeather = ""; // デフォルトをnormalに変更
         let dayAnalysisChart, weatherAnalysisChart;
         let currentFilter = 'すべて';
 
@@ -238,7 +238,10 @@
             map = L.map('map', { zoomControl: false, maxZoom: 19 }).setView([35.7289, 139.7104], 15);
             baseLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
             hybridLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 20 });
-            hybridLayer.addTo(map);
+            
+            // デフォルト表示をbaseLayerに変更
+            baseLayer.addTo(map); 
+            
             map.on('contextmenu', e => openSpotModal(e.latlng.lat, e.latlng.lng));
             startLocationWatch(); loadAllSpots();
         }
@@ -333,7 +336,6 @@
         }
         function closeAnalysisModal() { document.getElementById('analysisModal').style.display = 'none'; }
 
-        // --- 改良版一覧表示とフィルタ ---
         function filterList(cat) {
             currentFilter = cat;
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -350,35 +352,32 @@
             Object.keys(allSpots).reverse().forEach(id => {
                 const s = allSpots[id];
                 if (currentFilter !== 'すべて' && s.mainCat !== currentFilter) return;
-
                 const item = document.createElement('div');
                 item.className = "list-item";
                 item.onclick = () => { document.getElementById('listModal').style.display='none'; map.flyTo([s.lat, s.lng], 18); setTimeout(() => openSpotModal(s.lat, s.lng, id), 1600); };
-                
-                item.innerHTML = `
-                    <div class="list-info">
-                        <div class="list-title">
-                            <span class="cat-tag tag-${s.mainCat}">${s.mainCat}</span>
-                            <span>${s.subCat}</span>
-                        </div>
-                        <div class="list-meta">${s.rider} / ${s.time}</div>
-                        ${s.comment ? `<div class="list-comment">${s.comment}</div>` : ''}
-                    </div>
-                    <div class="list-icon">🔍</div>
-                `;
+                item.innerHTML = `<div class="list-info"><div class="list-title"><span class="cat-tag tag-${s.mainCat}">${s.mainCat}</span><span>${s.subCat}</span></div><div class="list-meta">${s.rider} / ${s.time}</div>${s.comment ? `<div class="list-comment">${s.comment}</div>` : ''}</div><div class="list-icon">🔍</div>`;
                 listDiv.appendChild(item);
             });
             if (listDiv.innerHTML === "") listDiv.innerHTML = "<p style='text-align:center; color:#999; font-size:0.8em; margin:20px 0;'>該当するデータはありません</p>";
         }
 
-        function openSpotList() {
-            renderSpotList();
-            document.getElementById('listModal').style.display = 'block';
-        }
+        function openSpotList() { renderSpotList(); document.getElementById('listModal').style.display = 'block'; }
 
         // --- MAP基本機能 ---
-        function toggleMapType() { if (mapType === 'hybrid') { map.removeLayer(hybridLayer); baseLayer.addTo(map); mapType = 'normal'; document.getElementById('layerBtn').innerText = "🛰️"; } else { map.removeLayer(baseLayer); hybridLayer.addTo(map); mapType = 'hybrid'; document.getElementById('layerBtn').innerText = "🗺️"; } }
-        async function searchAddress() { const q = document.getElementById('addrSearch').value; if(!q) return; try { const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=jp&limit=1`); const data = await res.json(); if(data && data[0]) map.flyTo([data[0].lat, data[0].lon], 18); } catch(e){} }
+        function toggleMapType() { 
+            if (mapType === 'hybrid') { 
+                map.removeLayer(hybridLayer); 
+                baseLayer.addTo(map); 
+                mapType = 'normal'; 
+                document.getElementById('layerBtn').innerText = "🛰️"; 
+            } else { 
+                map.removeLayer(baseLayer); 
+                hybridLayer.addTo(map); 
+                mapType = 'hybrid'; 
+                document.getElementById('layerBtn').innerText = "🗺️"; 
+            } 
+        }
+
         function analyzeMap() { const nowDay = new Date().getDay(), nowHour = new Date().getHours(); Object.keys(allSpots).forEach(id => { const s = allSpots[id]; const isRel = (s.day === nowDay && Math.abs(s.hour - nowHour) <= 2); if (mapMarkers[id]) { mapMarkers[id].setRadius(isRel ? 18 : 8); mapMarkers[id].setStyle({ weight: isRel ? 5 : 2, color: isRel ? '#000' : '#fff' }); } }); alert("分析完了！"); }
         function startLocationWatch() { navigator.geolocation.watchPosition(p => { const pos = [p.coords.latitude, p.coords.longitude]; if (!currentPosMarker) { currentPosMarker = L.circleMarker(pos, { radius: 8, fillColor: "#3498db", color: "#fff", weight: 3, fillOpacity: 1 }).addTo(map); map.setView(pos, 16); } else currentPosMarker.setLatLng(pos); window.latestPos = pos; }, null, { enableHighAccuracy: true }); }
         function goToCurrentLocation() { if (window.latestPos) map.flyTo(window.latestPos, 17); }
