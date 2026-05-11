@@ -29,43 +29,54 @@
         
         .gallery { display: flex; flex-direction: column; gap: 20px; }
         .gallery-item { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
-        .gallery-item img { width: 100%; height: auto; border-radius: 6px; display: block; margin-bottom: 10px; }
+        .gallery-item img { width: 100%; height: auto; border-radius: 6px; display: block; margin-bottom: 10px; cursor: pointer; }
         .delete-btn { width: 100%; background: #e74c3c; color: white; border: none; padding: 12px; font-size: 1em; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px; }
 
         .loading { display: none; text-align: center; padding: 20px; color: #7f8c8d; font-weight: bold; }
         .empty-msg { text-align: center; color: #999; padding: 20px; font-size: 0.9em; background: white; border-radius: 8px; border: 1px dashed #ccc; }
+
+        /* V1.12 フルスクリーンズームビューワー */
+        #imageViewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #000; z-index: 9999; overflow: auto; align-items: center; justify-content: center; }
+        .viewer-close { position: fixed; top: 20px; right: 20px; background: rgba(255,255,255,0.3); color: white; width: 40px; height: 40px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; cursor: pointer; z-index: 10000; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <button class="back-btn" onclick="goBack()">◀ 戻る</button>
-        <div style="font-weight: bold;">スクショ管理 V1.10</div>
-        <div style="width: 60px;"></div>
+    <div id="imageViewer">
+        <div class="viewer-close" onclick="closeImageViewer()">✕</div>
+        <img id="viewerImg" src="" style="max-width: 100%; height: auto; margin: auto; display: block;">
     </div>
 
-    <div class="container">
-        <div class="info-card">
-            <div class="date-container">
-                <button class="nav-btn" onclick="changeDay(-1)">◀</button>
-                <input type="date" id="dateSelector" class="date-input" onchange="changeDate()">
-                <button class="nav-btn" onclick="changeDay(1)">▶</button>
+    <div id="appUI">
+        <div class="header">
+            <button class="back-btn" onclick="goBack()">◀ 戻る</button>
+            <div style="font-weight: bold;">スクショ管理 V1.12</div>
+            <div style="width: 60px;"></div>
+        </div>
+
+        <div class="container">
+            <div class="info-card">
+                <div class="date-container">
+                    <button class="nav-btn" onclick="changeDay(-1)">◀</button>
+                    <input type="date" id="dateSelector" class="date-input" onchange="changeDate()">
+                    <button class="nav-btn" onclick="changeDay(1)">▶</button>
+                </div>
+                <div class="rider-display" id="displayRider">----</div>
             </div>
-            <div class="rider-display" id="displayRider">----</div>
+
+            <div class="upload-area">
+                <p style="color: #666; font-size: 0.85em; margin-top: 0; margin-bottom: 15px;">Googleマップのタイムラインを撮影し<br>下のボタンから追加してください。</p>
+                
+                <button class="map-btn" onclick="openTimeline()">📍 マップのタイムラインを開く</button>
+
+                <input type="file" id="fileInput" accept="image/*" multiple style="display: none;" onchange="handleFileSelect(event)">
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">📁 スクショを追加する</button>
+            </div>
+
+            <div id="loadingMsg" class="loading">⏳ 処理中...</div>
+
+            <div id="imageGallery" class="gallery"></div>
         </div>
-
-        <div class="upload-area">
-            <p style="color: #666; font-size: 0.85em; margin-top: 0; margin-bottom: 15px;">Googleマップのタイムラインを撮影し<br>下のボタンから追加してください。</p>
-            
-            <button class="map-btn" onclick="openTimeline()">📍 マップのタイムラインを開く</button>
-
-            <input type="file" id="fileInput" accept="image/*" multiple style="display: none;" onchange="handleFileSelect(event)">
-            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">📁 スクショを追加する</button>
-        </div>
-
-        <div id="loadingMsg" class="loading">⏳ 処理中...</div>
-
-        <div id="imageGallery" class="gallery"></div>
     </div>
 
     <script>
@@ -86,6 +97,21 @@
 
             loadExistingImages();
         };
+
+        // V1.12: 画像ビューワーロジック
+        function openImageViewer(src) {
+            document.getElementById('appUI').style.display = 'none';
+            document.getElementById('viewerImg').src = src;
+            document.getElementById('imageViewer').style.display = 'flex';
+            document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes');
+        }
+
+        function closeImageViewer() {
+            document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+            document.getElementById('imageViewer').style.display = 'none';
+            document.getElementById('appUI').style.display = 'block';
+            window.scrollTo(0, 0); 
+        }
 
         function goBack() {
             window.location.href = 'index.html';
@@ -169,8 +195,10 @@
             itemDiv.className = 'gallery-item';
             itemDiv.id = `img-${key}`;
             
+            // V1.12: 画像タップで全画面ビューワー起動
             itemDiv.innerHTML = `
-                <img src="${base64Src}" alt="Screenshot">
+                <img src="${base64Src}" alt="Screenshot" onclick="openImageViewer(this.src)">
+                <p style="font-size: 0.65em; text-align: center; color: #888; margin-top: -5px; margin-bottom: 8px;">タップで全画面表示（ズーム可能）</p>
                 <button class="delete-btn" onclick="deleteImage('${key}')">🗑️ この画像を削除</button>
             `;
             gallery.appendChild(itemDiv);
