@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Biz - V1.10</title>
+    <title>Goal Rider Biz - V1.11</title>
 
     <link rel="icon" href="https://img.icons8.com/clouds/256/delivery-man.png" type="image/png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/clouds/256/delivery-man.png">
@@ -98,7 +98,7 @@
         <button id="tabMap" class="tab-btn" onclick="showPage('map')">マップ</button>
     </div>
     
-    <div class="version-bar">GoalRider V1.10</div>
+    <div class="version-bar">GoalRider V1.11</div>
 
     <div id="pageSales" class="content-area active">
         <div class="rider-selector">
@@ -112,8 +112,11 @@
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                 <div class="header-name" id="riderDisplayName">---</div>
-                <div style="font-size: 0.75em; font-weight: bold;">目標: <span id="displayGoal">0</span>円</div>
-                <button style="padding:2px 6px; font-size:0.65em; background:#eee; border:1px solid #ccc; border-radius:4px;" onclick="setGoal()">設定</button>
+                <div style="font-size: 0.75em; font-weight: bold;">
+                    目標: <span id="displayGoal">0</span>円 
+                    <span style="color:#7f8c8d; font-size:0.9em;">(休 <span id="displayHolidays">0</span>日)</span>
+                </div>
+                <button style="padding:2px 6px; font-size:0.65em; background:#eee; border:1px solid #ccc; border-radius:4px;" onclick="openSettingsModal()">設定</button>
             </div>
             <div class="stats-grid">
                 <div><div class="stats-label">売上合計</div><div class="stats-val" id="totalSales">0円</div></div>
@@ -221,6 +224,23 @@
 
             <button class="btn-modal-primary" onclick="saveSales()">保存して閉じる</button>
             <button onclick="closeInputModal()" style="width:100%; border:none; background:none; color:#777; padding:10px;">閉じる</button>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-top:0;">設定</h3>
+            <div class="input-group">
+                <label>今月の目標金額 (円)</label>
+                <input type="number" id="settingGoal" placeholder="例: 300000">
+            </div>
+            <div class="input-group">
+                <label>今月の休日日数 (日)</label>
+                <input type="number" id="settingHolidays" placeholder="例: 6">
+                <p style="font-size: 0.7em; color: #7f8c8d; margin-top: 4px;">※設定した休日日数を加味して、1日の必要額を自動計算します。</p>
+            </div>
+            <button class="btn-modal-primary" onclick="saveSettings()" style="margin-top: 10px;">保存して閉じる</button>
+            <button onclick="closeSettingsModal()" style="width:100%; border:none; background:none; margin-top:8px; color:#666;">キャンセル</button>
         </div>
     </div>
 
@@ -359,12 +379,54 @@
 
         async function fetchCloudSales() { try { const res = await fetch(DB_SALES); allData = await res.json() || {}; renderApp(); } catch (e) {} }
 
+        function openSettingsModal() {
+            const n = RIDERS[currentRiderIdx];
+            const y = referenceDate.getFullYear(), m = referenceDate.getMonth();
+            const mk = `${y}-${String(m+1).padStart(2,'0')}`;
+            
+            const goal = (allData[n] && allData[n].goals) ? (allData[n].goals[mk] || DEFAULT_GOAL) : DEFAULT_GOAL;
+            const holidays = (allData[n] && allData[n].holidays) ? (allData[n].holidays[mk] || 0) : 0;
+            
+            document.getElementById('settingGoal').value = goal;
+            document.getElementById('settingHolidays').value = holidays;
+            document.getElementById('settingsModal').style.display = 'block';
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        async function saveSettings() {
+            const n = RIDERS[currentRiderIdx];
+            const y = referenceDate.getFullYear(), m = referenceDate.getMonth();
+            const mk = `${y}-${String(m+1).padStart(2,'0')}`;
+            
+            const goalVal = document.getElementById('settingGoal').value;
+            const holidaysVal = document.getElementById('settingHolidays').value;
+            
+            if(!allData[n]) allData[n] = {};
+            if(!allData[n].goals) allData[n].goals = {};
+            if(!allData[n].holidays) allData[n].holidays = {};
+            
+            allData[n].goals[mk] = Number(goalVal);
+            allData[n].holidays[mk] = Number(holidaysVal);
+            
+            renderApp();
+            closeSettingsModal();
+            await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) });
+        }
+
         function renderApp() {
-            const name = RIDERS[currentRiderIdx]; if (!allData[name]) allData[name] = { sales: {}, goals: {} };
+            const name = RIDERS[currentRiderIdx]; if (!allData[name]) allData[name] = { sales: {}, goals: {}, holidays: {} };
             const data = allData[name]; let labels = [], chartSales = [], chartExp = [], chartHourly = [], chartHours = [], tSales = 0, tExp = 0, tHours = 0;
             const y = referenceDate.getFullYear(), m = referenceDate.getMonth(), mk = `${y}-${String(m+1).padStart(2,'0')}`;
-            const goal = data.goals ? (data.goals[mk] || DEFAULT_GOAL) : DEFAULT_GOAL;
             
+            const goal = data.goals ? (data.goals[mk] || DEFAULT_GOAL) : DEFAULT_GOAL;
+            const holidaysCount = data.holidays ? (data.holidays[mk] || 0) : 0;
+            
+            document.getElementById('displayGoal').innerText = goal.toLocaleString();
+            document.getElementById('displayHolidays').innerText = holidaysCount;
+
             if (currentView === 'month') {
                 const last = new Date(y, m + 1, 0).getDate();
                 document.getElementById('periodLabel').innerText = `${y}年${m + 1}月`;
@@ -378,9 +440,26 @@
                 const today = new Date(); let drStr = "---";
                 if (today.getFullYear() === y && today.getMonth() === m) {
                     const todayKey = today.toISOString().split('T')[0];
-                    const todayDone = (data.sales[todayKey] && (data.sales[todayKey].hours || data.sales[todayKey].uber));
-                    let rd = last - today.getDate() + (todayDone ? 0 : 1);
-                    drStr = rd > 0 ? Math.ceil(Math.max(0, goal - tSales) / rd).toLocaleString() + "円" : "達成！";
+                    const todayData = data.sales[todayKey] || {};
+                    const todayDone = (todayData.hours || todayData.uber || todayData.demae || todayData.menu || todayData.rocket);
+                    
+                    let elapsedDays = today.getDate() - (todayDone ? 0 : 1);
+                    let workedPastDays = 0;
+                    for (let i = 1; i <= elapsedDays; i++) {
+                        let k = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                        let s = data.sales[k] || {};
+                        if (s.hours || s.uber || s.demae || s.menu || s.rocket) {
+                            workedPastDays++;
+                        }
+                    }
+                    
+                    let holidaysTaken = Math.max(0, elapsedDays - workedPastDays);
+                    let remainingHolidays = Math.max(0, holidaysCount - holidaysTaken);
+                    let remainingDaysInMonth = last - elapsedDays;
+                    
+                    let remainingWorkingDays = Math.max(1, remainingDaysInMonth - remainingHolidays);
+                    
+                    drStr = remainingWorkingDays > 0 ? Math.ceil(Math.max(0, goal - tSales) / remainingWorkingDays).toLocaleString() + "円" : "達成！";
                     document.getElementById('dailyRequiredLabel').innerText = todayDone ? "1日必要額(明日から)" : "1日必要額(今日込)";
                 }
                 document.getElementById('dailyRequired').innerText = drStr;
@@ -398,7 +477,6 @@
             }
             document.getElementById('totalSales').innerText = tSales.toLocaleString() + "円";
             document.getElementById('totalExpense').innerText = tExp.toLocaleString() + "円";
-            document.getElementById('displayGoal').innerText = goal.toLocaleString();
             document.getElementById('displayRemaining').innerText = Math.max(0, goal - tSales).toLocaleString() + "円";
             document.getElementById('avgHourly').innerText = tHours > 0 ? Math.round(tSales/tHours).toLocaleString() + "円" : "0円";
             document.getElementById('netHourly').innerText = tHours > 0 ? Math.round((tSales-tExp)/tHours).toLocaleString() + "円" : "0円";
@@ -498,11 +576,10 @@
         }
         function closeAnalysisModal() { document.getElementById('analysisModal').style.display = 'none'; }
         function setWeather(w) { selectedWeather = w; document.querySelectorAll('.weather-btn').forEach(b => { b.classList.remove('active'); if(b.getAttribute('data-w') === w) b.classList.add('active'); }); }
-        async function saveSales() { const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value; if(!allData[n]) allData[n] = { sales: {}, goals: {} }; allData[n].sales[dk] = { hours: Number(document.getElementById('inputHours').value), gas: Number(document.getElementById('inputGas').value), otherExp: Number(document.getElementById('inputOtherExp').value), uber: Number(document.getElementById('inputUber').value), demae: Number(document.getElementById('inputDemae').value), menu: Number(document.getElementById('inputMenu').value), rocket: Number(document.getElementById('inputRocket').value), weather: selectedWeather }; renderApp(); await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); closeInputModal(); }
+        async function saveSales() { const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value; if(!allData[n]) allData[n] = { sales: {}, goals: {}, holidays: {} }; allData[n].sales[dk] = { hours: Number(document.getElementById('inputHours').value), gas: Number(document.getElementById('inputGas').value), otherExp: Number(document.getElementById('inputOtherExp').value), uber: Number(document.getElementById('inputUber').value), demae: Number(document.getElementById('inputDemae').value), menu: Number(document.getElementById('inputMenu').value), rocket: Number(document.getElementById('inputRocket').value), weather: selectedWeather }; renderApp(); await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); closeInputModal(); }
         function loadExistingData() { const n = RIDERS[currentRiderIdx], dk = document.getElementById('inputDate').value; const d = (allData[n] && allData[n].sales && allData[n].sales[dk]) ? allData[n].sales[dk] : {}; document.getElementById('inputHours').value = d.hours || ""; document.getElementById('inputGas').value = d.gas || ""; document.getElementById('inputOtherExp').value = d.otherExp || ""; document.getElementById('inputUber').value = d.uber || ""; document.getElementById('inputDemae').value = d.demae || ""; document.getElementById('inputMenu').value = d.menu || ""; document.getElementById('inputRocket').value = d.rocket || ""; setWeather(d.weather || ""); }
         function openInputModal() { document.getElementById('inputModal').style.display='block'; loadExistingData(); }
         function closeInputModal() { document.getElementById('inputModal').style.display='none'; }
-        async function setGoal() { const n = RIDERS[currentRiderIdx], y = referenceDate.getFullYear(), m = referenceDate.getMonth(), mk = `${y}-${String(m+1).padStart(2,'0')}`, v = prompt(`${y}年${m+1}月の目標`, (allData[n].goals ? (allData[n].goals[mk] || 300000) : 300000)); if(v) { if(!allData[n].goals) allData[n].goals = {}; allData[n].goals[mk] = Number(v); renderApp(); await fetch(DB_SALES, { method: 'PUT', body: JSON.stringify(allData) }); } }
     </script>
 </body>
 </html>
