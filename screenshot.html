@@ -35,7 +35,7 @@
         .loading { display: none; text-align: center; padding: 20px; color: #7f8c8d; font-weight: bold; }
         .empty-msg { text-align: center; color: #999; padding: 20px; font-size: 0.9em; background: white; border-radius: 8px; border: 1px dashed #ccc; }
 
-        /* V1.12 フルスクリーンズームビューワー */
+        /* フルスクリーンズームビューワー */
         #imageViewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #000; z-index: 9999; overflow: auto; align-items: center; justify-content: center; }
         .viewer-close { position: fixed; top: 20px; right: 20px; background: rgba(255,255,255,0.3); color: white; width: 40px; height: 40px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; cursor: pointer; z-index: 10000; }
     </style>
@@ -98,7 +98,6 @@
             loadExistingImages();
         };
 
-        // V1.12: 画像ビューワーロジック
         function openImageViewer(src) {
             document.getElementById('appUI').style.display = 'none';
             document.getElementById('viewerImg').src = src;
@@ -195,7 +194,6 @@
             itemDiv.className = 'gallery-item';
             itemDiv.id = `img-${key}`;
             
-            // V1.12: 画像タップで全画面ビューワー起動
             itemDiv.innerHTML = `
                 <img src="${base64Src}" alt="Screenshot" onclick="openImageViewer(this.src)">
                 <p style="font-size: 0.65em; text-align: center; color: #888; margin-top: -5px; margin-bottom: 8px;">タップで全画面表示（ズーム可能）</p>
